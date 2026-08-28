@@ -120,14 +120,16 @@ function header(){
        '<button class="no" style="padding:4px" onclick="signOut()">sign out</button></span>';
   }
   $("top").innerHTML=h;
-  var tabs=[["quilt","The quilt"],["pets","Pets &amp; shelter"],["journal","Drive journal"],["sponsor","Sponsor a drive"]];
-  if(ME&&ME.role!=="family") tabs.unshift(["dash","Dashboard"]);
-  if(ME&&ME.role==="volunteer") tabs.splice(2,0,["mine","My tasks"]);
-  if(ME&&ME.role==="provider")  tabs.splice(2,0,["mine","My pledges"]);
-  if(ME&&ME.role==="admin")     tabs.splice(2,0,["mine","Run the drive"],["people","Everyone"]);
-  if(ME&&ME.role==="family")    tabs=[["slip","My request"],["pets","Pets &amp; shelter"],["journal","Drive journal"]];
+  var tabs=[["quilt","The quilt","\uD83E\uDDF5"],["pets","Pets &amp; shelter","\uD83D\uDC3E"],
+            ["journal","Drive journal","\uD83D\uDE9A"],["sponsor","Sponsor a drive","\uD83D\uDC9B"]];
+  if(ME&&ME.role!=="family") tabs.unshift(["dash","Dashboard","\uD83C\uDFE1"]);
+  if(ME&&ME.role==="volunteer") tabs.splice(2,0,["mine","My tasks","\uD83D\uDCCB"]);
+  if(ME&&ME.role==="provider")  tabs.splice(2,0,["mine","My pledges","\uD83D\uDCE6"]);
+  if(ME&&ME.role==="admin")     tabs.splice(2,0,["mine","Run the drive","\uD83D\uDDDD"],["people","Everyone","\uD83D\uDC65"]);
+  if(ME&&ME.role==="family")    tabs=[["slip","My request","\uD83D\uDD4A"],["pets","Pets &amp; shelter","\uD83D\uDC3E"],["journal","Drive journal","\uD83D\uDE9A"]];
   $("nav").innerHTML=tabs.map(function(t){
-    return '<button class="'+(VIEW===t[0]?"on":"")+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>';}).join("");
+    return '<button class="'+(VIEW===t[0]?"on":"")+'" onclick="go(\''+t[0]+'\')">'+
+      '<span class="ico" aria-hidden="true">'+(t[2]||"")+'</span>'+t[1]+'</button>';}).join("");
 }
 function go(v){VIEW=v;render();window.scrollTo(0,0);}
 function signOut(){ME=null;VIEW="quilt";render();}
