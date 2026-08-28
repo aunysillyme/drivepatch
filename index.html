@@ -407,7 +407,7 @@ table.reg .muted{font-size:12.5px}
     <button type="button" class="role" data-r="admin"><h4>I'm running the drive</h4>
       <p>Everyone who asked, everyone who helped, and who is still waiting.</p>
       <span class="ask">email and a password &middot; you'll see real names</span></button>
-    <button type="button" class="role" data-r="family"><h4>I asked for something</h4>
+    <button type="button" class="role" data-r="family"><h4>I told the shelter</h4>
       <p>Check where your request has got to. No account, ever.</p>
       <span class="ask">just the two words on your slip</span></button>
   </div>
@@ -1001,7 +1001,7 @@ function header(){
         '<span class="drivepick">'+DRIVE.name+' &middot; ends '+DRIVE.ends+'</span><span class="spacer"></span>';
   if(!ME){
     h+='<button class="btn ghost" onclick="openAuth()">Sign in</button>'+
-       '<button class="btn" onclick="go(\'ask\')">Ask for something</button>';
+       '<button class="btn" onclick="go(\'ask\')">Tell the shelter</button>';
   }
   else {
     var f=fabFor(ME.name);

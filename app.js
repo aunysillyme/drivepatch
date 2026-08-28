@@ -163,7 +163,7 @@ function header(){
         '<span class="drivepick">'+DRIVE.name+' &middot; ends '+DRIVE.ends+'</span><span class="spacer"></span>';
   if(!ME){
     h+='<button class="btn ghost" onclick="openAuth()">Sign in</button>'+
-       '<button class="btn" onclick="go(\'ask\')">Ask for something</button>';
+       '<button class="btn" onclick="go(\'ask\')">Tell the shelter</button>';
   }
   else {
     var f=fabFor(ME.name);
