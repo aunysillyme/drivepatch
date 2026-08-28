@@ -116,6 +116,11 @@ button{font-family:inherit}
 .patch.sewing svg.blk{animation:sew .85s cubic-bezier(.22,1,.36,1) both}
 @keyframes sew{from{opacity:0;transform:scale(.84) rotate(-4deg)}to{opacity:1;transform:none}}
 .patch.hide{display:none}
+/* a foster card is a portrait: the animal gets the whole band above the label */
+.patch.pet svg.blk{inset:0 0 auto 0;height:56%}
+.patch.pet .lbl{min-height:44%}
+.patch.pet::after{content:"";position:absolute;left:0;right:0;top:0;height:56%;
+  border-bottom:1.5px dashed var(--thread);pointer-events:none}
 
 /* ---------- task / pledge rows ---------- */
 .row{display:flex;gap:15px;align-items:flex-start;background:var(--cream);
@@ -243,6 +248,10 @@ dialog::backdrop{background:rgba(32,36,46,.5);backdrop-filter:blur(3px)}
 .foot{margin-top:44px;padding-top:20px;border-top:1px dashed var(--seam);
   font-size:14px;color:var(--mute);max-width:66ch;line-height:1.7}
 .foot b{color:var(--ink2);font-weight:600}
+
+/* an address you have not earned: never rendered legibly, and never sent */
+.blurred{font-family:Fraunces,Georgia,serif;font-size:24px;color:var(--mute);
+  filter:blur(7px);user-select:none;pointer-events:none}
 </style></head><body>
 <div class="wrap">
   <div class="top" id="top"></div>
@@ -562,7 +571,7 @@ function vPets(){
   return h;
 }
 function petCard(p,i,mode){
-  return '<div class="patch held" style="cursor:default">'+animal(p.k,FAB[p.f],i)+
+  return '<div class="patch held pet" style="cursor:default">'+animal(p.k,FAB[p.f],i)+
     '<span class="lbl"><span class="tag"><i></i>'+esc(p.age)+' &middot; needs a foster</span>'+
     '<span class="need" style="font-size:20px">'+esc(p.n)+'</span>'+
     '<span class="by" style="margin-top:5px">'+esc(p.s)+'</span>'+
@@ -680,7 +689,16 @@ var SQUARES=[
  {t:"Someone living alone &middot; a hot meal and company",s:"held",by:"Tomas",note:"delivered",f:6,k:6},
  {t:"A family of six &middot; bedding, and the heating is off",s:"wait",days:4}
 ];
-SQUARES.forEach(function(d,i){if(d.k===undefined)d.k=(i*3+1)%8;});
+var STREETS=["14 Farrow Lane","3 Beckwith Court","82 Alder Row","27 Hollis Street",
+ "9 Marsden Terrace","51 Quayle Road","6 Ivybridge Close","33 Pennant Way",
+ "18 Cobham Rise","70 Sedge Walk","5 Lantern Yard","44 Birchall Grove"];
+var WINDOWS=["Left on the doorstep, no knock","Pull up and we load the boot","A ten minute window, no queue"];
+SQUARES.forEach(function(d,i){
+  if(d.k===undefined)d.k=(i*3+1)%8;
+  d.addr=STREETS[i%STREETS.length]+", Northside";
+  d.how=WINDOWS[i%3];
+  d.by_when=["Thursday","Friday","next Monday","Saturday"][i%4];
+});
 
 var TASKS=[
  {when:"Today<br>9:00",t:"Sorting warm coats and bedding",where:"Lower hall, tables along the north wall",st:"wait"},
@@ -723,9 +741,10 @@ function header(){
   }
   $("top").innerHTML=h;
   var tabs=[["quilt","The quilt"],["pets","Pets &amp; shelter"],["journal","Drive journal"],["sponsor","Sponsor a drive"]];
-  if(ME&&ME.role==="volunteer") tabs.splice(1,0,["mine","My tasks"]);
-  if(ME&&ME.role==="provider")  tabs.splice(1,0,["mine","My pledges"]);
-  if(ME&&ME.role==="admin")     tabs.splice(1,0,["mine","Run the drive"],["people","Everyone"]);
+  if(ME&&ME.role!=="family") tabs.unshift(["dash","Dashboard"]);
+  if(ME&&ME.role==="volunteer") tabs.splice(2,0,["mine","My tasks"]);
+  if(ME&&ME.role==="provider")  tabs.splice(2,0,["mine","My pledges"]);
+  if(ME&&ME.role==="admin")     tabs.splice(2,0,["mine","Run the drive"],["people","Everyone"]);
   if(ME&&ME.role==="family")    tabs=[["slip","My request"],["pets","Pets &amp; shelter"],["journal","Drive journal"]];
   $("nav").innerHTML=tabs.map(function(t){
     return '<button class="'+(VIEW===t[0]?"on":"")+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>';}).join("");
@@ -895,16 +914,148 @@ function vAsk(){
 function addWho(k){var l=$("whoList");
   l.insertAdjacentHTML("beforeend",'<span class="person" style="padding-left:13px"><b>'+k+'</b></span>');}
 
+
+/* ---------------- dashboards: what this person should do next ---------------- */
+function statRow(items){
+  return '<div class="grid g3" style="margin:18px 0 4px">'+items.map(function(s){
+    return '<div class="card"><div class="muted">'+s[1]+'</div>'+
+      '<div class="big"'+(s[2]?' style="color:'+s[2]+'"':'')+'>'+s[0]+'</div></div>';}).join("")+'</div>';
+}
+function nextCard(kicker,title,where,action,onclick){
+  return '<div class="card" style="border-color:var(--navy);border-width:2px;margin-top:6px">'+
+    '<div class="sl" style="margin-bottom:8px">'+kicker+'</div>'+
+    '<h3 style="font-size:26px;margin-bottom:6px">'+title+'</h3>'+
+    (where?'<div class="where" style="font-size:15px;color:var(--ink2);display:flex;align-items:center;gap:7px;margin-bottom:14px">'+pinSvg()+where+'</div>':'')+
+    (action?'<button class="btn" onclick="'+onclick+'">'+action+'</button>':'')+'</div>';
+}
+function myHeld(){return SQUARES.filter(function(d){return d.s==="held"&&d.by===(ME&&ME.name);}).length;}
+function myWalks(){var c=0;for(var k in BOOKED)c++;return c;}
+
+function dashVolunteer(){
+  var next=TASKS.filter(function(t){return t.st==="wait";})[0];
+  return '<h1 style="font-size:36px;margin-bottom:4px">Hello, '+esc(ME.name)+'.</h1>'+
+    '<p class="lede">Thank you for giving your time to the drive today.</p>'+
+    (next?nextCard("your next shift",next.t,esc(next.where),"See all my tasks","go(\'mine\')"):
+          nextCard("nothing booked","You have no active tasks right now.","","Find something to do","go(\'mine\')"))+
+    statRow([[TASKS.filter(function(t){return t.st==="wait";}).length,"tasks to do"],
+             [myHeld(),"squares you are holding"],
+             [myWalks(),"walks booked"]])+
+    '<div class="sect">the drive right now</div>'+countBar();
+}
+function dashProvider(){
+  var open=PLEDGES.filter(function(p){return p.st==="wait";})[0];
+  return '<h1 style="font-size:36px;margin-bottom:4px">Welcome back, '+esc(ME.name)+'.</h1>'+
+    '<p class="lede">Thank you for taking a square on the quilt.</p>'+
+    (open?nextCard("still to drop off",open.t,"Parish hall side door, ten to four on weekdays","See all my pledges","go(\'mine\')"):
+          nextCard("all clear","Everything you promised has arrived.","","Take another square","go(\'quilt\')"))+
+    statRow([[PLEDGES.filter(function(p){return p.st==="wait";}).length,"not dropped off yet"],
+             [PLEDGES.filter(function(p){return p.st==="done";}).length,"received"],
+             [myHeld(),"squares you are holding"]])+
+    '<div class="sect">the drive right now</div>'+countBar();
+}
+function dashAdmin(){
+  var w=waiting(), longest=w.slice().sort(function(x,y){return (y.days||0)-(x.days||0);})[0];
+  return '<h1 style="font-size:36px;margin-bottom:4px">'+esc(ME.name)+'.</h1>'+
+    '<p class="lede">You are the only person who sees real names, so keep this window private.</p>'+
+    (longest?nextCard("waiting longest &mdash; chase this one",longest.t,
+      (longest.days||0)+" days on the board with nobody holding it","Open the drive","go(\'mine\')"):
+      nextCard("all clear","Every square has somebody.","","Open the drive","go(\'mine\')"))+
+    statRow([[w.length,"households still waiting"],
+             [2,"volunteers with nothing to do"],
+             [1,"pledges past drop-off","var(--warm)"]])+
+    statRow([[petWaiting(),"shelter squares waiting"],
+             [PETS.filter(function(p){return p.need==="foster";}).length,"animals needing a foster"],
+             [SPONSORS.length,"sponsors this winter"]])+
+    '<div class="rowb" style="margin-top:20px">'+
+      '<button class="btn" onclick="exportCsv()">Download the drive records</button>'+
+      '<button class="btn ghost" onclick="go(\'people\')">See everyone</button>'+
+      '<button class="btn ghost" onclick="go(\'mine\')">Run the drive</button></div>';
+}
+function vDash(){
+  if(!ME) return vQuilt();
+  if(ME.role==="volunteer")return dashVolunteer();
+  if(ME.role==="provider") return dashProvider();
+  if(ME.role==="admin")    return dashAdmin();
+  return vSlip();
+}
+
+
+/* ---------------- one square, in full ----------------
+   The address is the most sensitive field in the whole system, so it is gated
+   twice: signed out you cannot even ask, and signed in you still have to take
+   the square on before it appears. Nobody browses where poor people live. */
+var SQ=-1;
+function openSquare(i){SQ=i;VIEW="sq";render();window.scrollTo(0,0);}
+function vSquare(){
+  var d=SQUARES[SQ]; if(!d)return vQuilt();
+  var held=d.s==="held", mine=held&&ME&&d.by===ME.name;
+  var f=FAB[held?d.f:0];
+  var gate;
+  if(!ME){
+    gate='<div class="card" style="border-style:dashed;text-align:center;padding:26px">'+
+      '<div class="sl" style="margin-bottom:9px">delivery address</div>'+
+      '<div class="blurred">'+esc(d.addr)+'</div>'+
+      '<p class="muted" style="margin:12px auto 14px;max-width:44ch">Addresses are never shown to people who are not signed in. Not blurred in the browser &mdash; not sent at all.</p>'+
+      '<button class="btn" onclick="openAuth()">Sign in to see the address</button></div>';
+  } else if(!mine){
+    gate='<div class="card" style="border-style:dashed;text-align:center;padding:26px">'+
+      '<div class="sl" style="margin-bottom:9px">delivery address</div>'+
+      '<div class="blurred">'+esc(d.addr)+'</div>'+
+      '<p class="muted" style="margin:12px auto 14px;max-width:46ch">'+
+      (held?'Somebody else is holding this square, so the address is theirs, not yours.'
+           :'Take this square on and the address appears. Until then nobody needs it, including you.')+'</p>'+
+      (held?'':'<button class="btn warm" onclick="claimSquare('+SQ+')">Claim this square to see the address</button>')+'</div>';
+  } else {
+    gate='<div class="card" style="border-color:var(--ok);border-width:2px">'+
+      '<div class="sl" style="margin-bottom:9px">delivery address &middot; yours only</div>'+
+      '<h3 style="font-size:25px;margin-bottom:4px">'+esc(d.addr)+'</h3>'+
+      '<div class="where" style="display:flex;align-items:center;gap:7px;color:var(--ink2);margin:8px 0 4px">'+pinSvg()+esc(d.how)+'</div>'+
+      '<div class="muted">Please have it there by '+esc(d.by_when)+'.</div>'+
+      '<div class="qr" style="margin-top:18px"><div class="code">'+
+        QR.svg("DRIVEPATCH:DROP:"+SQ+":"+encodeURIComponent(d.addr),120,"#22304F","#FEFBF6")+'</div>'+
+        '<div class="txt"><h4>Show this at handover</h4><p>Scanned once and the square turns warm for everybody watching the quilt.</p></div></div>'+
+      '<div class="priv" style="margin-top:16px">You are seeing this because you took this square on. It disappears again if you hand it back.</div></div>';
+  }
+  return '<button class="btn ghost" onclick="go(\'quilt\')" style="margin-bottom:18px">&larr; Back to the quilt</button>'+
+    '<div class="grid g2" style="align-items:start">'+
+      '<div><div class="patch '+(held?"held":"waiting")+'" style="cursor:default;max-width:330px">'+
+        block(d.k,f,!held)+'<span class="stitch"></span><span class="lbl">'+
+        '<span class="tag"><i></i>'+(held?"taken care of":"still waiting")+'</span>'+
+        '<span class="need">'+d.t+'</span>'+
+        (held?'<span class="by">Stitched in by '+esc(d.by)+'</span>':'')+
+        '</span></div></div>'+
+      '<div>'+
+        '<div class="sl">square #'+(SQ+1)+' &middot; '+DRIVE.name+'</div>'+
+        '<h1 style="font-size:30px;line-height:1.2;margin:6px 0 12px">'+d.t+'</h1>'+
+        (held?'':'<p class="lede" style="font-size:16px;margin-bottom:16px">On the board '+(d.days||0)+' days. Nobody is holding it yet.</p>')+
+        '<div class="sect" style="margin-top:8px">what is needed</div>'+
+        '<div class="card" style="margin-bottom:14px"><p style="color:var(--ink2)">'+d.t+
+          '. Bring what you would want somebody to bring you. If you are unsure, the organisers will tell you.</p></div>'+
+        gate+
+      '</div></div>'+
+    '<div class="foot"><b>The household never sees you either.</b> They get a text saying it is ready, in the way they chose to receive it.</div>';
+}
+function claimSquare(i){
+  pickIdx=i; pickPet=-1;
+  $("dneed").innerHTML=SQUARES[i].t;
+  $("fabs").innerHTML=FAB.map(function(f,k){
+    return '<button type="button" class="fab'+(k===pickFab?" on":"")+'" data-f="'+k+'">'+block(k%8,f,false)+'</button>';}).join("");
+  if(ME&&ME.name)$("dname").value=ME.name;
+  $("dlg").showModal();
+}
+
 function render(){
   header();
   var v=VIEW,h="";
-  if(v==="mine"&&ME){h=ME.role==="volunteer"?vMineVolunteer():ME.role==="provider"?vMineProvider():vMineAdmin();}
+  if(v==="dash"&&ME)h=vDash();
+  else if(v==="mine"&&ME){h=ME.role==="volunteer"?vMineVolunteer():ME.role==="provider"?vMineProvider():vMineAdmin();}
   else if(v==="pets")h=vPets();
   else if(v==="people")h=vPeople();
   else if(v==="journal")h=vJournal();
   else if(v==="sponsor")h=vSponsor();
   else if(v==="slip")h=vSlip();
   else if(v==="ask")h=vAsk();
+  else if(v==="sq")h=vSquare();
   else h=vQuilt();
   $("app").innerHTML=h;
 }
@@ -921,12 +1072,7 @@ document.addEventListener("click",function(e){
     if(ME&&ME.name)$("dname").value=ME.name;
     pickIdx=-1; pickPet=+p.dataset.pn; $("dlg").showModal(); return;
   }
-  pickPet=-1; pickIdx=+p.dataset.i;
-  $("dneed").innerHTML=SQUARES[pickIdx].t;
-  $("fabs").innerHTML=FAB.map(function(f,i){
-    return '<button type="button" class="fab'+(i===pickFab?" on":"")+'" data-f="'+i+'">'+block(i%8,f,false)+'</button>';}).join("");
-  if(ME&&ME.name)$("dname").value=ME.name;
-  $("dlg").showModal();
+  if(p.dataset.i!==undefined){ openSquare(+p.dataset.i); return; }
 });
 document.addEventListener("click",function(e){
   var b=e.target.closest(".fab"); if(!b)return;
@@ -941,6 +1087,7 @@ function stitchIn(){
   SQUARES[pickIdx].s="held"; SQUARES[pickIdx].f=pickFab;
   SQUARES[pickIdx].by=nm; SQUARES[pickIdx].note="just taken on";
   var idx=pickIdx; $("dlg").close(); render();
+  if(VIEW==="sq"){SQ=idx;render();}
   var el=document.querySelector('#quilt [data-i="'+idx+'"]');
   if(el){el.classList.add("sewing");el.scrollIntoView({block:"center",behavior:"smooth"});}
   if(!waiting().length)setTimeout(function(){$("hush").classList.add("on");},1100);
@@ -958,7 +1105,7 @@ function doSignIn(kind){
   var v=$(kind==="family"?"fem":kind==="admin"?"aname":"vname").value.trim();
   if(!v)v=kind==="family"?"The Winter Wren":kind==="admin"?"Northside Trust":"a neighbour";
   ME={name:v,role:kind};
-  VIEW=kind==="family"?"slip":"mine";
+  VIEW=kind==="family"?"slip":"dash";
   $("auth").close(); render();
 }
 

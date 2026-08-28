@@ -118,7 +118,7 @@ function vPets(){
   return h;
 }
 function petCard(p,i,mode){
-  return '<div class="patch held" style="cursor:default">'+animal(p.k,FAB[p.f],i)+
+  return '<div class="patch held pet" style="cursor:default">'+animal(p.k,FAB[p.f],i)+
     '<span class="lbl"><span class="tag"><i></i>'+esc(p.age)+' &middot; needs a foster</span>'+
     '<span class="need" style="font-size:20px">'+esc(p.n)+'</span>'+
     '<span class="by" style="margin-top:5px">'+esc(p.s)+'</span>'+
