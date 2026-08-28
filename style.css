@@ -365,3 +365,14 @@ table.reg .muted{font-size:12.5px}
   object-fit:cover;object-position:center 42%;display:block}
 @media(max-width:560px){.walkthumb{width:100px;height:100px}}
 .walkcard{display:flex;align-items:stretch;min-height:132px}
+
+/* ---------- animals on the main quilt ---------- */
+.patch.ispet{box-shadow:0 2px 0 rgba(32,36,46,.05),inset 0 0 0 2px rgba(184,118,46,.35)}
+.pawbadge{position:absolute;top:9px;right:9px;z-index:3;width:28px;height:28px;border-radius:50%;
+  background:var(--cream);border:1.5px solid var(--warm);color:var(--warm);
+  display:grid;place-items:center;box-shadow:0 2px 5px rgba(32,36,46,.18)}
+.tag.pet{color:var(--warm)}
+.chip.pets{display:inline-flex;align-items:center;gap:7px}
+.chip.pets svg{color:var(--warm)}
+.chip.pets.on svg{color:var(--warm2)}
+.patch.ispet.waiting::before{border-color:rgba(184,118,46,.55)}

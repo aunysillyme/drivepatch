@@ -270,15 +270,46 @@ function countBar(){
   var w=waiting().length,tot=SQUARES.length;
   return '<div class="count'+(w?"":" done")+'"><b>'+(w||"Nobody")+'</b>'+
     '<span class="lab">'+(w===1?"household still waiting":(w?"households still waiting":"is waiting"))+'</span>'+
-    '<span class="sub">'+(tot-w)+' of '+tot+' taken care of<br>'+
+    '<span class="sub">'+(tot-w)+' of '+tot+' taken care of &middot; '+
+      (typeof petWaiting==="function"?petWaiting()+' shelter squares and '+
+        PETS.filter(function(p){return p.need==="foster";}).length+' animals too':'')+'<br>'+
     '<em>'+(w?"longest wait is "+Math.max.apply(null,waiting().map(function(d){return d.days||0;}))+" days":"the quilt is finished")+'</em></span></div>';
 }
+function pawSvg(){return '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">'+
+ '<ellipse cx="7" cy="8" rx="2.3" ry="3"/><ellipse cx="12" cy="6.2" rx="2.3" ry="3.1"/>'+
+ '<ellipse cx="17" cy="8" rx="2.3" ry="3"/><ellipse cx="20" cy="13" rx="2.1" ry="2.6"/>'+
+ '<path d="M12 11.4c3.2 0 5.6 2.5 5.6 4.8 0 1.9-1.7 2.9-3.4 2.9-1 0-1.5-.4-2.2-.4s-1.2.4-2.2.4c-1.7 0-3.4-1-3.4-2.9 0-2.3 2.4-4.8 5.6-4.8z"/></svg>';}
+
+/* one board. households, animals needing a foster, and what the shelter is short of. */
+function boardItems(){
+  var out=SQUARES.map(function(d,i){return {kind:"hh",d:d,i:i};});
+  PETS.filter(function(p){return p.need==="foster";}).forEach(function(p){
+    out.push({kind:"pet",p:p});});
+  PETNEEDS.forEach(function(d,i){out.push({kind:"sup",d:d,i:i});});
+  return out;
+}
 function quiltHTML(){
-  return SQUARES.map(function(d,i){
-    var held=d.s==="held", f=FAB[held?d.f:0], hid=(FILTER==="wait"&&held)?" hide":"";
-    return '<button class="patch '+(held?"held":"waiting")+hid+'" data-i="'+i+'"'+(held?" disabled":"")+'>'+
-      block(d.k,f,!held)+'<span class="stitch"></span><span class="lbl">'+
-      '<span class="tag"><i></i>'+(held?"taken care of":"still waiting")+'</span>'+
+  return boardItems().map(function(it){
+    if(it.kind==="pet"){
+      var p=it.p, hid=(FILTER==="hh")?" hide":"";
+      return '<button class="patch held pet ispet'+hid+'" onclick="openPet(\''+esc(p.n)+'\')">'+
+        petFace(p,p.n.length)+'<span class="pawbadge">'+pawSvg()+'</span><span class="lbl">'+
+        '<span class="tag pet"><i></i>'+esc(p.age)+' &middot; needs a foster</span>'+
+        '<span class="need">'+esc(p.n)+'</span>'+
+        '<span class="by">'+esc(p.s)+'</span>'+
+        '<span class="cta">Meet '+esc(p.n)+'</span></span></button>';
+    }
+    var d=it.d, held=d.s==="held", f=FAB[held?(it.kind==="sup"?(it.i*3)%8:d.f):0];
+    var hid=((FILTER==="wait"&&held)||(FILTER==="hh"&&it.kind==="sup")||
+             (FILTER==="pets"&&it.kind==="hh"))?" hide":"";
+    var attr=it.kind==="sup"?'data-pn="'+it.i+'"':'data-i="'+it.i+'"';
+    return '<button class="patch '+(held?"held":"waiting")+(it.kind==="sup"?" ispet":"")+hid+'" '+attr+
+      (held?" disabled":"")+'>'+
+      block(it.kind==="sup"?(it.i*2+1)%8:d.k,f,!held)+
+      (it.kind==="sup"?'<span class="pawbadge">'+pawSvg()+'</span>':'')+
+      '<span class="stitch"></span><span class="lbl">'+
+      '<span class="tag'+(it.kind==="sup"?" pet":"")+'"><i></i>'+
+        (it.kind==="sup"?"shelter &middot; ":"")+(held?"taken care of":"still waiting")+'</span>'+
       '<span class="need">'+d.t+'</span>'+
       (held?'<span class="by">Stitched in by '+esc(d.by)+' &middot; '+esc(d.note)+'</span>'
            :'<span class="cta">I\'ll volunteer</span>')+
@@ -297,8 +328,10 @@ function vQuilt(){
     progressBoard()+
     '<div class="bar"><h2>The quilt</h2>'+
     '<button class="chip '+(FILTER==="all"?"on":"")+'" onclick="setF(\'all\')">Everything</button>'+
-    '<button class="chip '+(FILTER==="wait"?"on":"")+'" onclick="setF(\'wait\')">Only what\'s still waiting</button>'+
-    '<span class="hint">Every square is one household. Take one and it\'s yours to finish.</span></div>'+
+    '<button class="chip '+(FILTER==="wait"?"on":"")+'" onclick="setF(\'wait\')">Still waiting</button>'+
+    '<button class="chip '+(FILTER==="hh"?"on":"")+'" onclick="setF(\'hh\')">Households</button>'+
+    '<button class="chip pets '+(FILTER==="pets"?"on":"")+'" onclick="setF(\'pets\')">'+pawSvg()+' Pets &amp; shelter</button>'+
+    '<span class="hint">Every square is one household or one animal.</span></div>'+
     '<div class="quilt" id="quilt">'+quiltHTML()+'</div>'+
     '<div class="sect">who is holding a square</div><div class="people">'+contributors()+'</div>'+
     '<div class="foot"><b>Nobody\'s name appears on this quilt.</b> Households are shown as the shape of what '+
