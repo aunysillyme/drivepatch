@@ -50,24 +50,86 @@ function animal(kind,f,seed){
   return s+'</svg>';
 }
 
+
+/* a photo where we have one, the appliqué square where we do not */
+function petFace(p,seed){
+  if(p.img) return '<img class="blk" src="'+p.img+'" alt="'+esc(p.n)+'" loading="lazy">';
+  return animal(p.k,FAB[p.f],seed);
+}
+var PETNOW=null;
+function openPet(name){
+  PETNOW=PETS.filter(function(p){return p.n===name;})[0]||null;
+  VIEW="pet"; render(); window.scrollTo(0,0);
+}
+function vPet(){
+  var p=PETNOW; if(!p) return vPets();
+  var slots=p.walks.map(function(w){
+    var taken=BOOKED[p.n+"|"+w];
+    return '<button class="chip'+(taken?" on":"")+'" '+(taken?"disabled":"")+
+      ' onclick="bookWalk(\''+esc(p.n)+'\',\''+w+'\')">'+w+(taken?" \u00b7 yours":"")+'</button>';}).join("");
+  return '<button class="btn ghost" onclick="go(\'pets\')" style="margin-bottom:18px">&larr; Back to the shelter</button>'+
+  '<div class="petpage">'+
+    '<div class="petshot">'+petFace(p,p.n.length)+'</div>'+
+    '<div>'+
+      '<div class="sl">'+esc(p.age)+' &middot; '+(p.need==="foster"?"needs a foster tonight":"looking for company")+'</div>'+
+      '<h1 style="font-size:44px;line-height:1;margin:6px 0 12px">'+esc(p.n)+'</h1>'+
+      '<p class="lede" style="font-size:17px;margin-bottom:16px">'+esc(p.s)+'</p>'+
+      '<div class="traits">'+p.traits.map(function(t){return '<span class="tr">'+esc(t)+'</span>';}).join("")+'</div>'+
+      '<div class="deets">'+
+        '<div><b>Loves</b><span>'+esc(p.likes)+'</span></div>'+
+        '<div><b>Not keen on</b><span>'+esc(p.dislikes)+'</span></div>'+
+        '<div><b>At the vet</b><span>'+esc(p.vet)+'</span></div>'+
+        '<div><b>With others</b><span>'+esc(p["with"])+'</span></div>'+
+      '</div>'+
+      '<div class="rowb" style="margin-top:20px">'+
+        (p.need==="foster"?'<button class="btn warm" onclick="foster(\''+esc(p.n)+'\')">Foster '+esc(p.n)+'</button>':'')+
+        (p.walks.length?'<button class="btn ghost" onclick="document.querySelector(\'.walkslots\').scrollIntoView({block:\'center\'})">Book a walk</button>':'')+
+      '</div>'+
+    '</div>'+
+  '</div>'+
+  (p.walks.length?'<div class="sect">walk '+esc(p.n)+'</div>'+
+    '<p class="lede" style="font-size:16px;margin-bottom:14px">Pick a time. You turn up, they get an hour out, and somebody is pleased to see you.</p>'+
+    '<div class="rowb walkslots">'+slots+'</div>':'')+
+  '<div class="foot"><b>'+esc(p.n)+' has a name and a face on purpose.</b> Households on this drive do not, '+
+  'and that asymmetry is deliberate: a name is what gets an animal home, and anonymity is what lets a family ask.</div>';
+}
+
 /* ---------------- the shelter side of the drive ---------------- */
 var PETS=[
- {n:"Biscuit",k:"kitten",age:"11 weeks",f:3,
+ {n:"Biscuit",k:"kitten",age:"11 weeks",f:3,img:"pets/biscuit.jpg",
+  traits:["sleeps in shoes","purrs constantly","tiny"],
+  likes:"being carried in a coat pocket",dislikes:"being put down",
+  vet:"vaccinated, too young to neuter",with:"good with other cats, untested with dogs",
   s:"Found under a parked van in the sleet. Sleeps in a shoe. Needs a foster before the cold sets in.",
   need:"foster",walks:[]},
- {n:"Marlow",k:"dog",age:"6 years",f:4,
+ {n:"Marlow",k:"dog",age:"6 years",f:4,img:"pets/marlow.jpg",
+  traits:["quiet","heavy-footed","leans"],
+  likes:"leaning his whole weight on your leg",dislikes:"being left in the yard",
+  vet:"neutered, chipped, all up to date",with:"fine with dogs, calm around children",
   s:"Waited longest of anyone here. Quiet, heavy-footed, leans on your leg the whole time.",
   need:"walk",walks:["Tue 10:00","Tue 15:00","Thu 11:00","Sat 09:30"]},
- {n:"Pepper",k:"cat",age:"3 years",f:2,
+ {n:"Pepper",k:"cat",age:"3 years",f:2,img:"pets/pepper.jpg",
+  traits:["watchful","clean","talks"],
+  likes:"a windowsill and someone in the room",dislikes:"being the only one left",
+  vet:"spayed, chipped, healthy",with:"came in with a sister who has been rehomed",
   s:"Came in with her sister, who has been rehomed. Does not like being the only one left.",
   need:"foster",walks:[]},
- {n:"Tuppence",k:"puppy",age:"14 weeks",f:0,
+ {n:"Tuppence",k:"puppy",age:"14 weeks",f:0,img:"pets/tuppence.jpg",
+  traits:["chaotic","affectionate","teething"],
+  likes:"socks, shoes, table legs, you",dislikes:"nothing yet, give it time",
+  vet:"first jabs done, second due in three weeks",with:"loves everyone, no manners at all",
   s:"Chews everything that is not nailed down. Will be somebody's whole world.",
   need:"walk",walks:["Wed 14:00","Fri 10:30","Sat 13:00"]},
  {n:"Otis",k:"dog",age:"9 years",f:6,
+  traits:["deaf","unbothered","enormous"],
+  likes:"a sofa, and somebody sitting on it with him",dislikes:"stairs",
+  vet:"neutered, arthritic, on daily medication we provide",with:"utterly unbothered by anything",
   s:"Old, deaf, entirely unbothered. Wants a sofa and somebody to sit on it.",
   need:"foster",walks:["Mon 11:00","Thu 15:30"]},
  {n:"Nettle",k:"cat",age:"2 years",f:5,
+  traits:["shy then not","warm","opinionated"],
+  likes:"your keyboard, specifically",dislikes:"the first four minutes of meeting you",
+  vet:"spayed, chipped, healthy",with:"better as the only cat",
   s:"Shy for about four minutes, then she is on your keyboard.",
   need:"walk",walks:["Tue 13:00","Fri 16:00"]}
 ];
@@ -118,12 +180,12 @@ function vPets(){
   return h;
 }
 function petCard(p,i,mode){
-  return '<div class="patch held pet" style="cursor:default">'+animal(p.k,FAB[p.f],i)+
+  return '<button class="patch held pet" onclick="openPet(\''+esc(p.n)+'\')">'+petFace(p,i)+
     '<span class="lbl"><span class="tag"><i></i>'+esc(p.age)+' &middot; needs a foster</span>'+
     '<span class="need" style="font-size:20px">'+esc(p.n)+'</span>'+
     '<span class="by" style="margin-top:5px">'+esc(p.s)+'</span>'+
-    '<button class="cta" style="margin-top:11px;cursor:pointer" onclick="foster(\''+esc(p.n)+'\')">Foster '+esc(p.n)+'</button>'+
-    '</span></div>';
+    '<span class="cta" style="margin-top:11px">Meet '+esc(p.n)+'</span>'+
+    '</span></button>';
 }
 function walkCard(p){
   var slots=p.walks.map(function(w){
@@ -132,9 +194,9 @@ function walkCard(p){
       ' onclick="bookWalk(\''+esc(p.n)+'\',\''+w+'\')">'+w+(taken?" &middot; yours":"")+'</button>';}).join("");
   return '<div class="card" style="padding:0;overflow:hidden">'+
     '<div style="display:flex;gap:0;align-items:stretch">'+
-      '<div style="width:118px;flex:none;position:relative">'+animal(p.k,FAB[p.f],p.n.length)+'</div>'+
+      '<button style="width:118px;flex:none;position:relative;border:0;padding:0;background:none;cursor:pointer" onclick="openPet(\''+esc(p.n)+'\')">'+petFace(p,p.n.length)+'</button>'+
       '<div style="padding:16px 18px;flex:1;min-width:0">'+
-        '<h4 style="font-size:21px;margin-bottom:2px">'+esc(p.n)+'</h4>'+
+        '<h4 style="font-size:21px;margin-bottom:2px"><button class="petlink" onclick="openPet(\''+esc(p.n)+'\')">'+esc(p.n)+'</button></h4>'+
         '<div class="muted" style="margin-bottom:7px">'+esc(p.age)+'</div>'+
         '<p style="font-size:14.5px;color:var(--ink2);line-height:1.5;margin-bottom:12px">'+esc(p.s)+'</p>'+
         '<div class="sl" style="margin-bottom:8px">free walking slots</div>'+

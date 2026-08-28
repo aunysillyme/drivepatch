@@ -149,6 +149,85 @@ function go(v){VIEW=v;render();window.scrollTo(0,0);}
 function signOut(){ME=null;VIEW="quilt";render();}
 
 /* ---------------- views ---------------- */
+
+/* ---------------- the progress board ----------------
+   Not "how far along are we" - every drive dashboard says that and it tells the
+   organiser nothing they can act on. This says whether they are going to FINISH,
+   which of the needs nobody is touching, and who has been waiting too long. */
+var DAYS_LEFT=6;                       /* to the drive's closing date */
+function kindOf(t){
+  var s=String(t).toLowerCase();
+  if(/coat|boot|warm|jacket|clothes|size/.test(s))   return "warm clothes";
+  if(/groceries|meal|food|eat|hot meal/.test(s))     return "food";
+  if(/bed|bedding|blanket|heating|heat|oil/.test(s)) return "keeping warm at home";
+  if(/teenager|newborn|baby|boy|girl|child|sister/.test(s)) return "something for a child";
+  return "not specified";
+}
+function pace(){
+  /* squares taken per day so far, then how long the rest would take at that rate */
+  var held=SQUARES.filter(function(d){return d.s==="held";}).length;
+  var elapsed=8;                        /* days the drive has been open */
+  var perDay=held/elapsed;
+  var left=waiting().length;
+  if(!left) return {done:true};
+  if(perDay<=0) return {days:Infinity,perDay:0,late:true};
+  var days=Math.ceil(left/perDay);
+  return {days:days,perDay:perDay,late:days>DAYS_LEFT,over:days-DAYS_LEFT};
+}
+function stuck(){return waiting().filter(function(d){return (d.days||0)>=5;});}
+function starved(){
+  var by={};
+  waiting().forEach(function(d){var k=kindOf(d.t);by[k]=(by[k]||0)+1;});
+  var top=null,tn=0;
+  for(var k in by){if(by[k]>tn){tn=by[k];top=k;}}
+  return top?{kind:top,n:tn}:null;
+}
+function waitLadder(){
+  var buckets=[0,0,0,0];   /* 0-2, 3-4, 5-7, 8+ days */
+  waiting().forEach(function(d){var v=d.days||0;
+    buckets[v<3?0:v<5?1:v<8?2:3]++;});
+  var max=Math.max.apply(null,buckets)||1;
+  var lab=["under 3 days","3 to 4 days","5 to 7 days","over a week"];
+  var col=["var(--ok)","var(--navy)","var(--warm)","#A33F1F"];
+  return '<div class="ladder">'+buckets.map(function(v,i){
+    return '<div class="rung"><div class="bar"><span style="height:'+
+      (v?Math.max(9,Math.round(v/max*100)):3)+'%;background:'+col[i]+'"></span></div>'+
+      '<b>'+v+'</b><span>'+lab[i]+'</span></div>';}).join("")+'</div>';
+}
+function progressBoard(){
+  var p=pace(), st=stuck(), sv=starved(), w=waiting().length, tot=SQUARES.length;
+  if(!w) return '';
+  var paceCard = p.late
+    ? '<div class="pcard warn"><div class="pk">will this drive finish?</div>'+
+      '<div class="pv">No &mdash; '+p.over+' day'+(p.over===1?"":"s")+' short</div>'+
+      '<p>At the rate squares are being taken, the last household is reached about '+
+      p.days+' days from now. The drive closes in '+DAYS_LEFT+'. '+
+      '<b>'+Math.ceil((w-p.perDay*DAYS_LEFT))+' households would be left waiting.</b></p></div>'
+    : '<div class="pcard ok"><div class="pk">will this drive finish?</div>'+
+      '<div class="pv">Yes, with '+(DAYS_LEFT-p.days)+' day'+((DAYS_LEFT-p.days)===1?"":"s")+' spare</div>'+
+      '<p>At the current rate the last household is reached in about '+p.days+' days, and the drive closes in '+DAYS_LEFT+'.</p></div>';
+
+  return '<div class="sect">the progress board</div>'+
+    '<div class="pgrid">'+
+      paceCard+
+      '<div class="pcard"><div class="pk">nobody has touched these</div>'+
+        '<div class="pv">'+st.length+'</div>'+
+        '<p>'+(st.length?'Waiting five days or more with no volunteer. '+
+          'These are the ones to name out loud at the next meeting.':'Every square has had interest in the last few days.')+'</p>'+
+        (st.length?'<div class="stucklist">'+st.slice(0,3).map(function(d){
+          return '<button class="stuckrow" onclick="openSquare('+SQUARES.indexOf(d)+')">'+
+            '<span class="d">'+(d.days||0)+'d</span><span>'+d.t+'</span></button>';}).join("")+'</div>':'')+
+      '</div>'+
+      '<div class="pcard"><div class="pk">what is going unclaimed</div>'+
+        '<div class="pv">'+(sv?esc(sv.kind):"nothing")+'</div>'+
+        '<p>'+(sv?sv.n+' of the '+w+' waiting squares are this. Donors give what they have, '+
+          'not what is short &mdash; so this is the thing to ask for by name.':'')+'</p></div>'+
+      '<div class="pcard"><div class="pk">how long people have waited</div>'+
+        waitLadder()+
+      '</div>'+
+    '</div>';
+}
+
 function countBar(){
   var w=waiting().length,tot=SQUARES.length;
   return '<div class="count'+(w?"":" done")+'"><b>'+(w||"Nobody")+'</b>'+
@@ -177,6 +256,7 @@ function vQuilt(){
   return '<div class="hero"><h1>A drive where <em>nobody waits.</em></h1>'+
     '<p class="lede">Every other drive counts what came in. This one counts who hasn\'t been reached yet, and the number only goes down.</p></div>'+
     countBar()+
+    progressBoard()+
     '<div class="bar"><h2>The quilt</h2>'+
     '<button class="chip '+(FILTER==="all"?"on":"")+'" onclick="setF(\'all\')">Everything</button>'+
     '<button class="chip '+(FILTER==="wait"?"on":"")+'" onclick="setF(\'wait\')">Only what\'s still waiting</button>'+
@@ -415,6 +495,7 @@ function dashAdmin(){
     statRow([[w.length,"households still waiting"],
              [2,"volunteers with nothing to do"],
              [1,"pledges past drop-off","var(--warm)"]])+
+    progressBoard()+
     statRow([[petWaiting(),"shelter squares waiting"],
              [PETS.filter(function(p){return p.need==="foster";}).length,"animals needing a foster"],
              [SPONSORS.length,"sponsors this winter"]])+
@@ -555,6 +636,7 @@ function render(){
   if(v==="dash"&&ME)h=vDash();
   else if(v==="mine"&&ME){h=ME.role==="volunteer"?vMineVolunteer():ME.role==="provider"?vMineProvider():vMineAdmin();}
   else if(v==="pets")h=vPets();
+  else if(v==="pet")h=vPet();
   else if(v==="people")h=vPeople();
   else if(v==="journal")h=vJournal();
   else if(v==="sponsor")h=vSponsor();
