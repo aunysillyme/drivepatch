@@ -11,7 +11,8 @@ var QR=(function(){
   /* data codewords / ec-per-block / blocks, EC level M, versions 1..10 */
   var V=[null,
     {t:26,e:10,b:1},{t:44,e:16,b:1},{t:70,e:26,b:1},{t:100,e:18,b:2},{t:134,e:24,b:2},
-    {t:172,e:16,b:4},{t:196,e:18,b:4},{t:242,e:22,b:4},{t:292,e:22,b:5},{t:346,e:26,b:5}];
+    {t:172,e:16,b:4}];   /* versions 7-10 removed: they need version-info blocks
+                            and a 16-bit length that this encoder does not write. */
   function cap(v){var s=V[v];return s.t-s.e*s.b;}
 
   function make(text){
@@ -20,7 +21,8 @@ var QR=(function(){
       if(c<128)bytes.push(c);
       else if(c<2048){bytes.push(192|c>>6,128|c&63);}
       else {bytes.push(224|c>>12,128|c>>6&63,128|c&63);}}
-    var ver=1;while(ver<10&&bytes.length+ (ver<10?2:3) > cap(ver))ver++;
+    var ver=1;while(ver<6&&bytes.length+2>cap(ver))ver++;
+    if(bytes.length+2>cap(ver)) throw new Error("QR payload too long: "+bytes.length+" bytes");
     var spec=V[ver],total=cap(ver);
     /* bit stream: mode 0100, length, data, terminator */
     var bits=[];
@@ -89,9 +91,21 @@ var QR=(function(){
       var g2=[];for(i=0;i<n;i++){g2[i]=[];for(var j3=0;j3<n;j3++)
         g2[i][j3]=res[i][j3]?m[i][j3]:(m[i][j3]^(maskAt(k4,i,j3)?1:0));}
       var f2=FMT[k4];
+      /* Format info, 15 bits, written twice. Copy 1 runs along row 8 then up
+         column 8; copy 2 runs up column 8 from the bottom then along row 8 from
+         the right. Getting these coordinates wrong yields a matrix that looks
+         perfect and decodes as nothing. */
       for(i=0;i<15;i++){var b3=(f2>>i)&1;
-        if(i<6)g2[8][i]=b3; else if(i<8)g2[8][i+1]=b3; else g2[8][n-15+i]=b3;
-        if(i<8)g2[n-1-i][8]=b3; else if(i<9)g2[15-i][8]=b3; else g2[14-i][8]=b3;}
+        if(i<6)       g2[8][i]=b3;
+        else if(i===6)g2[8][7]=b3;
+        else if(i===7)g2[8][8]=b3;
+        else if(i===8)g2[7][8]=b3;
+        else          g2[14-i][8]=b3;
+        /* copy 2: bits 0-6 climb column 8 from the bottom, then bit 7 onward run
+           along row 8 from the right. Bit 7 must NOT land on (n-8,8) - that cell
+           is the dark module, and writing it there is what broke masks 0 and 3. */
+        if(i<7) g2[n-1-i][8]=b3;
+        else    g2[8][n-15+i]=b3;}
       g2[n-8][8]=1;
       /* penalty: runs of 5+, 2x2 blocks, dark ratio */
       var pen=0,dark=0;

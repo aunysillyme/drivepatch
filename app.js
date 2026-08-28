@@ -183,7 +183,9 @@ function vQuilt(){
     '<span class="hint">Every square is one household. Take one and it\'s yours to finish.</span></div>'+
     '<div class="quilt" id="quilt">'+quiltHTML()+'</div>'+
     '<div class="sect">who is holding a square</div><div class="people">'+contributors()+'</div>'+
-    '<div class="foot"><b>Nobody\'s name appears on this quilt.</b> Households are shown as the shape of what they need, never as who they are. Only the organisers can see who is who, and only because somebody has to hand the coats over.</div>';
+    '<div class="foot"><b>Nobody\'s name appears on this quilt.</b> Households are shown as the shape of what '+
+    'they need. Only the organisers can see who is who, and only because somebody has to hand the coats over. '+
+    'Organisers: keep the wording general &mdash; in a small community, enough detail is a name.</div>';
 }
 function vMineVolunteer(){
   var t=TASKS.map(function(k){
@@ -268,7 +270,9 @@ function vSponsor(){
     '<div class="sect" style="color:rgba(234,226,212,.6);margin-top:26px">already sponsoring this winter</div>'+
     '<div class="sponsors">'+SPONSORS.map(function(s){return '<span class="s">'+esc(s)+'</span>';}).join("")+'</div>'+
     '</div>'+
-    '<div class="foot"><b>Sponsors never see a household.</b> They see the same quilt everyone else sees, and a receipt.</div>';
+    '<div class="foot"><b>Sponsors see the same quilt everyone else sees, and a receipt.</b> '+
+    'No names, no addresses. Organisers should still read each square before it goes up &mdash; in a small town, '+
+    '&ldquo;a single dad, three kids, Alder Row&rdquo; is a name even when you have not written one.</div>';
 }
 function vSlip(){
   var em=ME?ME.name:"The Winter Wren";
@@ -370,6 +374,7 @@ function nextCard(kicker,title,where,action,onclick){
     (where?'<div class="where" style="font-size:15px;color:var(--ink2);display:flex;align-items:center;gap:7px;margin-bottom:14px">'+pinSvg()+where+'</div>':'')+
     (action?'<button class="btn" onclick="'+onclick+'">'+action+'</button>':'')+'</div>';
 }
+function dropPaid(i){PAID[i].taken=null;PAID[i].takenBy=null;render();}
 function myHeld(){return SQUARES.filter(function(d){return d.s==="held"&&d.by===(ME&&ME.name);}).length;}
 function myWalks(){var c=0;for(var k in BOOKED)c++;return c;}
 
@@ -381,7 +386,12 @@ function dashVolunteer(){
           nextCard("nothing booked","You have no active tasks right now.","","Find something to do","go(\'mine\')"))+
     statRow([[TASKS.filter(function(t){return t.st==="wait";}).length,"tasks to do"],
              [myHeld(),"squares you are holding"],
-             [myWalks(),"walks booked"]])+
+             ["$"+myPaid().reduce(function(s,p){return s+p.rate*p.hrs;},0),"sponsored work you have taken","var(--warm)"]])+
+    (myPaid().length?'<div class="sect">paid work you have taken</div>'+myPaid().map(function(p){
+      return '<div class="row"><div class="when">$'+(p.rate*p.hrs)+'</div><div class="body">'+
+        '<h4>'+esc(p.t)+'</h4><div class="where">'+pinSvg()+esc(p.where)+' &middot; '+esc(p.when)+'</div></div>'+
+        '<div class="side"><span class="pill done">yours</span></div></div>';}).join("")
+      :'')+
     '<div class="sect">the drive right now</div>'+countBar();
 }
 function dashProvider(){
@@ -436,13 +446,13 @@ function vSquare(){
   if(!ME){
     gate='<div class="card" style="border-style:dashed;text-align:center;padding:26px">'+
       '<div class="sl" style="margin-bottom:9px">delivery address</div>'+
-      '<div class="blurred">'+esc(d.addr)+'</div>'+
-      '<p class="muted" style="margin:12px auto 14px;max-width:44ch">Addresses are never shown to people who are not signed in. Not blurred in the browser &mdash; not sent at all.</p>'+
+      '<div class="blurred" aria-hidden="true">&mdash;&mdash; &mdash;&mdash;&mdash;&mdash;&mdash;, &mdash;&mdash;&mdash;&mdash;</div>'+
+      '<p class="muted" style="margin:12px auto 14px;max-width:46ch">The address is not on this page. It is not blurred text you could copy or a screen reader could read &mdash; it is simply not rendered until somebody takes the square on.</p>'+
       '<button class="btn" onclick="openAuth()">Sign in to see the address</button></div>';
   } else if(!mine){
     gate='<div class="card" style="border-style:dashed;text-align:center;padding:26px">'+
       '<div class="sl" style="margin-bottom:9px">delivery address</div>'+
-      '<div class="blurred">'+esc(d.addr)+'</div>'+
+      '<div class="blurred" aria-hidden="true">&mdash;&mdash; &mdash;&mdash;&mdash;&mdash;&mdash;, &mdash;&mdash;&mdash;&mdash;</div>'+
       '<p class="muted" style="margin:12px auto 14px;max-width:46ch">'+
       (held?'Somebody else is holding this square, so the address is theirs, not yours.'
            :'Take this square on and the address appears. Until then nobody needs it, including you.')+'</p>'+
@@ -480,7 +490,7 @@ function vSquare(){
 function resetSheet(){
   $("dsub").innerHTML="You're taking this one on. It stops being a number the moment you do.";
   $("dfl").style.display="";
-  $("dpriv").innerHTML="You'll get the drop-off details by text. The organisers handle the handover, the way the household chose to receive it.";
+  $("dpriv").innerHTML="Taking this on shows you the delivery address, because somebody has to get there. You will still never see the household's name, and they chose how it reaches them.";
 }
 function claimSquare(i){
   resetSheet(); pickIdx=i; pickPet=-1;
@@ -502,6 +512,14 @@ function vPaid(){
       (open.length===1?"opportunity open":"opportunities open")+'</span>'+
       '<span class="sub">$'+pot+' unclaimed this week<br>'+
       '<em>paid within 3 days, no invoice needed</em></span></div>'+
+    (ME&&myPaid().length?'<div class="sect">yours</div>'+myPaid().map(function(p){
+       return '<div class="row" style="border-color:var(--ok);border-width:2px">'+
+         '<div class="when" style="min-width:96px"><div style="font-family:Fraunces,Georgia,serif;font-size:26px;color:var(--ok);line-height:1">$'+(p.rate*p.hrs)+'</div>'+
+         '<div class="muted" style="font-size:11.5px">you will be paid</div></div>'+
+         '<div class="body"><h4>'+esc(p.t)+'</h4><div class="where">'+pinSvg()+esc(p.where)+' &middot; '+esc(p.when)+'</div>'+
+         '<div class="muted" style="margin-top:5px">Paid within 3 days of finishing. No invoice.</div></div>'+
+         '<div class="side"><button class="btn ghost" onclick="dropPaid('+PAID.indexOf(p)+')">Hand it back</button></div></div>';}).join("")
+      :'')+
     '<div class="sect">open right now</div>'+
     PAID.map(function(p,i){
       return '<div class="row"><div class="when" style="min-width:96px">'+
@@ -513,8 +531,10 @@ function vPaid(){
         '<div class="muted" style="margin-top:3px">Sponsored by '+esc(p.by)+
           ' &middot; about $'+(p.rate*p.hrs)+' in total</div></div>'+
         '<div class="side">'+(p.taken
-          ? '<span class="pill done">taken by '+esc(p.taken)+'</span>'
-          : '<button class="btn warm" onclick="takePaid('+i+')">Take this</button>')+
+          ? '<span class="pill '+(ME&&p.takenBy===ME.name?"done":"wait")+'">'+
+              (ME&&p.takenBy===ME.name?"yours \u00b7 in your dashboard":"taken by "+esc(p.taken))+'</span>'
+          : (ME?'<button class="btn warm" onclick="takePaid('+i+')">Take this</button>'
+               :'<button class="btn ghost" onclick="openAuth()">Sign in to take this</button>'))+
         '</div></div>';}).join("")+
     '<div class="sect">who is funding this</div><div class="people">'+
       SPONSORS.map(function(s){return '<span class="person" style="padding-left:13px"><b>'+esc(s)+'</b></span>';}).join("")+
@@ -524,8 +544,10 @@ function vPaid(){
     'That is the point: needing help and needing work are the same week for most people.</div>';
 }
 function takePaid(i){
-  PAID[i].taken=(ME&&ME.name)||"you"; render();
+  if(!ME){ openAuth(); return; }              /* the drive has to know who is owed */
+  PAID[i].taken=ME.name; PAID[i].takenBy=ME.name; render();
 }
+function myPaid(){return PAID.filter(function(p){return ME&&p.takenBy===ME.name;});}
 
 function render(){
   header();
@@ -598,7 +620,10 @@ function exportCsv(){
   var rows=[["square","status","need","held_by","days_waiting"]];
   SQUARES.forEach(function(d,i){rows.push([i+1,d.s==="held"?"taken care of":"still waiting",
     d.t.replace(/&middot;/g,"-").replace(/"/g,"'"),d.by||"",d.days||0]);});
-  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c)+'"';}).join(",");}).join("\n");
+  /* a name typed as =1+1 must not become a formula when the org opens this */
+  var csv=rows.map(function(r){return r.map(function(c){
+    var v=String(c); if(/^[=+\-@\t\r]/.test(v)) v="'"+v;
+    return '"'+v.replace(/"/g,'""')+'"';}).join(",");}).join("\n");
   var url=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
   var a=document.createElement("a");a.href=url;a.download="northside-winter-drive.csv";
   document.body.appendChild(a);a.click();document.body.removeChild(a);
