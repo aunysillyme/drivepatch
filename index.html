@@ -1,0 +1,799 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Patchwork</title>
+<meta name="description" content="A community drive where nobody waits. Every square is one household. The number that matters counts down.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#FAF4EA; --muslin:#EFE6D6; --cream:#FEFBF6;
+  --ink:#20242E; --ink2:#4E5566; --mute:#828B9C;
+  --seam:#DDD3C2; --thread:#B9AE99;
+  --navy:#22304F; --navy2:#33456B; --navylite:#8E9BB6;
+  --warm:#B8762E; --warm2:#E3BB84;
+  --ok:#4E7A5C;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);
+  font-family:Inter,system-ui,sans-serif;font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+  background-image:repeating-linear-gradient(0deg,rgba(130,139,156,.05) 0 1px,transparent 1px 3px),
+                   repeating-linear-gradient(90deg,rgba(130,139,156,.05) 0 1px,transparent 1px 3px)}
+.wrap{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:22px 20px 90px}
+h1,h2,h3,h4{font-family:Fraunces,Georgia,serif;font-weight:400;letter-spacing:-.015em}
+button{font-family:inherit}
+
+/* ---------- header ---------- */
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding-bottom:16px;border-bottom:1px dashed var(--seam);margin-bottom:26px}
+.brand{font-family:Fraunces,Georgia,serif;font-size:24px;font-weight:600;cursor:pointer;
+  background:none;border:0;color:var(--ink);padding:0}
+.drivepick{font-size:13.5px;color:var(--ink2);background:var(--cream);
+  border:1.5px solid var(--seam);border-radius:999px;padding:6px 14px}
+.spacer{margin-left:auto}
+.btn{font-size:13.5px;font-weight:600;color:var(--cream);background:var(--navy);
+  border:0;border-radius:999px;padding:9px 18px;cursor:pointer}
+.btn:hover{background:var(--navy2)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--seam)}
+.btn.ghost:hover{border-color:var(--navy);color:var(--navy)}
+.btn.warm{background:var(--warm)}.btn.warm:hover{background:#9C6224}
+.me{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink2)}
+.me .sw{width:26px;height:26px;border-radius:4px;overflow:hidden;flex:none;display:block}
+.me .sw svg{width:100%;height:100%;display:block}
+.role-pill{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;
+  color:var(--navy);background:rgba(34,48,79,.09);border-radius:999px;padding:4px 10px}
+
+/* ---------- nav ---------- */
+.nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:26px}
+.nav button{font-size:13.5px;font-weight:500;color:var(--ink2);background:transparent;
+  border:1.5px solid transparent;border-radius:999px;padding:8px 16px;cursor:pointer}
+.nav button:hover{background:var(--cream);border-color:var(--seam)}
+.nav button.on{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+
+/* ---------- generic ---------- */
+.hero h1{font-size:clamp(34px,5.6vw,52px);font-weight:300;line-height:1.08;max-width:16ch;margin-bottom:14px}
+.hero h1 em{font-style:italic;color:var(--navy);font-weight:400}
+.lede{font-size:18px;color:var(--ink2);max-width:56ch}
+.sect{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;
+  color:var(--mute);margin:34px 0 14px;display:flex;align-items:center;gap:10px}
+.sect::after{content:"";flex:1;height:1px;background:var(--seam)}
+.card{background:var(--cream);border:1.5px solid var(--seam);border-radius:5px;padding:20px 22px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.muted{color:var(--mute);font-size:13.5px}
+.big{font-family:Fraunces,Georgia,serif;font-size:44px;line-height:1;color:var(--navy);
+  font-variant-numeric:tabular-nums}
+
+/* ---------- the count ---------- */
+.count{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:28px 0 6px;
+  padding:22px 26px;background:var(--cream);border:1.5px solid var(--seam);border-radius:5px}
+.count b{font-family:Fraunces,Georgia,serif;font-size:56px;font-weight:400;line-height:1;
+  color:var(--navy);font-variant-numeric:tabular-nums;transition:color .6s}
+.count .lab{font-family:Fraunces,Georgia,serif;font-size:23px;font-style:italic}
+.count .sub{margin-left:auto;font-size:13.5px;color:var(--mute);text-align:right;line-height:1.55}
+.count .sub em{font-style:normal;color:var(--ok);font-weight:600}
+.count.done b{color:var(--warm)}
+
+/* ---------- the quilt ---------- */
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:24px 0 14px}
+.bar h2{font-size:26px;margin-right:6px}
+.chip{font-size:13px;font-weight:500;padding:7px 15px;cursor:pointer;background:transparent;
+  border:1.5px solid var(--seam);border-radius:999px;color:var(--ink2)}
+.chip:hover{border-color:var(--thread)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.hint{font-size:13.5px;color:var(--mute);margin-left:auto}
+.quilt{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:900px){.quilt{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.quilt{grid-template-columns:1fr}}
+.patch{position:relative;aspect-ratio:1/1.08;background:var(--muslin);border:0;padding:0;
+  border-radius:4px;cursor:pointer;text-align:left;overflow:hidden;display:block;
+  box-shadow:0 2px 0 rgba(32,36,46,.05);transition:transform .25s,box-shadow .25s}
+.patch:hover{transform:translateY(-3px);box-shadow:0 16px 28px -20px rgba(32,36,46,.6)}
+.patch:disabled{cursor:default}.patch:disabled:hover{transform:none}
+.patch svg.blk{position:absolute;inset:0;width:100%;height:100%;display:block}
+.patch.waiting svg.blk{opacity:.5}
+.patch.waiting:hover svg.blk{opacity:.85;transition:opacity .3s}
+.patch.waiting::before{content:"";position:absolute;left:8px;right:8px;top:8px;bottom:8px;
+  border:1.5px dashed rgba(130,139,156,.55);border-radius:3px;pointer-events:none;z-index:1}
+.lbl{position:absolute;left:0;right:0;bottom:0;background:var(--cream);
+  border-top:1.5px dashed var(--thread);padding:13px 14px 14px;min-height:48%;
+  display:flex;flex-direction:column;z-index:2}
+.tag{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  display:flex;align-items:center;gap:6px;margin-bottom:8px;color:var(--navy)}
+.tag i{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.patch.held .tag{color:var(--warm)}
+.need{font-family:Fraunces,Georgia,serif;font-size:17px;line-height:1.3;margin-bottom:auto;color:var(--ink)}
+.by{font-size:12.5px;color:var(--ink2);margin-top:9px;line-height:1.4}
+.cta{margin-top:10px;align-self:flex-start;font-size:12.5px;font-weight:600;color:var(--navy);
+  border:1.5px solid rgba(34,48,79,.4);border-radius:999px;padding:5px 13px;background:transparent}
+.patch:hover .cta{background:var(--navy);color:var(--cream);border-color:var(--navy)}
+.stitch{position:absolute;inset:7px;border-radius:3px;pointer-events:none;z-index:1;
+  border:1.5px dashed rgba(254,251,246,.5);opacity:0;transition:opacity .5s .35s}
+.patch.held .stitch{opacity:1}
+.patch.sewing svg.blk{animation:sew .85s cubic-bezier(.22,1,.36,1) both}
+@keyframes sew{from{opacity:0;transform:scale(.84) rotate(-4deg)}to{opacity:1;transform:none}}
+.patch.hide{display:none}
+
+/* ---------- task / pledge rows ---------- */
+.row{display:flex;gap:15px;align-items:flex-start;background:var(--cream);
+  border:1.5px solid var(--seam);border-radius:5px;padding:17px 19px;margin-bottom:11px}
+.row .when{font-family:Fraunces,Georgia,serif;font-size:15px;color:var(--navy);
+  min-width:74px;flex:none;line-height:1.3}
+.row .body{flex:1;min-width:0}
+.row h4{font-size:18.5px;margin-bottom:3px}
+.row .where{font-size:14px;color:var(--ink2);display:flex;align-items:center;gap:7px;margin-top:5px}
+.row .where svg{flex:none}
+.row .side{flex:none;display:flex;flex-direction:column;gap:7px;align-items:flex-end}
+.pill{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;
+  padding:4px 10px;border-radius:999px;white-space:nowrap}
+.pill.wait{background:rgba(34,48,79,.1);color:var(--navy)}
+.pill.done{background:rgba(78,122,92,.14);color:var(--ok)}
+.pill.late{background:rgba(184,118,46,.16);color:#8C5518}
+
+/* ---------- contributors ---------- */
+.people{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.person{display:flex;align-items:center;gap:8px;background:var(--cream);
+  border:1.5px solid var(--seam);border-radius:999px;padding:5px 13px 5px 5px;font-size:13.5px}
+.person .sw{width:24px;height:24px;border-radius:50%;overflow:hidden;flex:none;display:block}
+.person .sw svg{width:100%;height:100%;display:block}
+.person b{font-weight:600}
+.person span{color:var(--mute);font-size:12.5px}
+
+/* ---------- QR ---------- */
+.qr{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.qr .code{background:var(--cream);padding:11px;border:1.5px solid var(--seam);border-radius:5px;
+  line-height:0;flex:none}
+.qr .code svg{display:block}
+.qr .txt{min-width:180px;flex:1}
+.qr .txt h4{font-size:19px;margin-bottom:5px}
+.qr .txt p{font-size:14px;color:var(--ink2);line-height:1.55}
+
+/* ---------- journal ---------- */
+.post{border-left:2px solid var(--seam);padding:2px 0 20px 20px;position:relative}
+.post::before{content:"";position:absolute;left:-6px;top:7px;width:10px;height:10px;
+  border-radius:50%;background:var(--navy);border:2px solid var(--paper)}
+.post .date{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--mute)}
+.post h4{font-size:20px;margin:4px 0 6px}
+.post p{font-size:15.5px;color:var(--ink2);line-height:1.65;max-width:64ch}
+
+/* ---------- family slip ---------- */
+.slip{background:var(--cream);border:1.5px solid var(--seam);border-radius:6px;
+  padding:30px 28px;max-width:620px;box-shadow:0 20px 44px -32px rgba(32,36,46,.7)}
+.slip .em{font-family:Fraunces,Georgia,serif;font-size:34px;font-style:italic;color:var(--navy);
+  margin-bottom:6px;line-height:1.15}
+.steps{margin-top:24px}
+.step{display:flex;gap:14px;padding-bottom:20px;position:relative}
+.step::before{content:"";position:absolute;left:11px;top:26px;bottom:0;width:2px;background:var(--seam)}
+.step:last-child::before{display:none}
+.step .dot{width:24px;height:24px;border-radius:50%;flex:none;border:2px solid var(--seam);
+  background:var(--paper);display:grid;place-items:center;font-size:12px;color:var(--mute);z-index:1}
+.step.done .dot{background:var(--ok);border-color:var(--ok);color:#fff}
+.step.now .dot{background:var(--navy);border-color:var(--navy);color:#fff}
+.step h4{font-size:18px;margin-bottom:2px}
+.step p{font-size:14.5px;color:var(--ink2);line-height:1.55}
+.step.todo h4,.step.todo p{color:var(--mute)}
+
+/* ---------- dialogs ---------- */
+dialog{border:0;padding:0;background:transparent;max-width:540px;width:calc(100% - 30px)}
+dialog::backdrop{background:rgba(32,36,46,.5);backdrop-filter:blur(3px)}
+.sheet{background:var(--cream);border-radius:6px;padding:28px 26px 24px;
+  border:1.5px solid var(--seam);box-shadow:0 30px 60px -30px rgba(32,36,46,.85);
+  max-height:88vh;overflow:auto}
+.sheet h3{font-size:27px;line-height:1.2;margin-bottom:6px}
+.sheet .sub2{font-size:15px;color:var(--ink2);margin-bottom:20px}
+.sl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;
+  color:var(--mute);margin-bottom:10px}
+.fabrics{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:20px}
+.fab{aspect-ratio:1;border:2px solid transparent;border-radius:4px;cursor:pointer;padding:0;
+  overflow:hidden;background:none}
+.fab svg{width:100%;height:100%;display:block}
+.fab.on{border-color:var(--ink);box-shadow:0 0 0 3px var(--cream),0 0 0 4.5px var(--ink)}
+.in{width:100%;font-family:Inter,sans-serif;font-size:16px;color:var(--ink);background:var(--paper);
+  border:1.5px solid var(--seam);border-radius:4px;padding:11px 13px;margin-bottom:16px}
+.in:focus{outline:none;border-color:var(--navy)}
+.rowb{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.no{font-size:14px;color:var(--mute);background:none;border:0;cursor:pointer;padding:10px}
+.no:hover{color:var(--ink)}
+.priv{font-size:12.5px;color:var(--ink2);line-height:1.6;margin-top:16px;
+  border-top:1px dashed var(--seam);padding-top:13px}
+.roles{display:grid;gap:9px}
+.role{text-align:left;background:var(--paper);border:1.5px solid var(--seam);border-radius:4px;
+  padding:15px 16px;cursor:pointer;transition:border-color .2s,background .2s}
+.role:hover{border-color:var(--thread)}
+.role.on{border-color:var(--navy);background:var(--cream)}
+.role h4{font-size:19px;margin-bottom:3px}
+.role p{font-size:13.5px;color:var(--ink2);line-height:1.5}
+.role .ask{display:block;margin-top:7px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  font-weight:600;color:var(--mute)}
+.pane{display:none;margin-top:20px}.pane.on{display:block}
+.note{font-size:13px;color:var(--ink2);line-height:1.6;background:rgba(34,48,79,.06);
+  border-left:2px solid var(--navy);padding:12px 14px;border-radius:0 3px 3px 0;margin-top:14px}
+
+/* ---------- sponsor ---------- */
+.spon{background:linear-gradient(155deg,#22304F,#16203A);color:#EAE2D4;border-radius:6px;
+  padding:32px 30px;margin-top:16px}
+.spon h2{color:#FBF3E4;font-size:31px;font-weight:300;max-width:20ch;margin-bottom:10px}
+.spon h2 em{font-style:italic;color:var(--warm2)}
+.spon p{color:rgba(234,226,212,.8);max-width:56ch;font-size:16px}
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:22px}
+.tier{background:rgba(255,255,255,.06);border:1.5px solid rgba(234,226,212,.22);
+  border-radius:5px;padding:18px;cursor:pointer;text-align:left}
+.tier:hover{border-color:var(--warm2);background:rgba(255,255,255,.1)}
+.tier b{display:block;font-family:Fraunces,Georgia,serif;font-size:27px;color:#FBF3E4;margin-bottom:4px}
+.tier span{font-size:13.5px;color:rgba(234,226,212,.75);line-height:1.5;display:block}
+.sponsors{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.sponsors .s{font-size:13px;color:rgba(234,226,212,.9);background:rgba(255,255,255,.09);
+  border-radius:999px;padding:6px 14px}
+
+/* ---------- hush ---------- */
+.hush{position:fixed;inset:0;z-index:60;display:none;place-items:center;text-align:center;padding:30px;
+  background:radial-gradient(120% 90% at 50% 40%,#3E4A66,#1A2133 70%)}
+.hush.on{display:grid;animation:fade 1.6s ease both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.hush h2{font-size:clamp(29px,5.4vw,48px);font-weight:300;font-style:italic;color:#FBEFD9;
+  line-height:1.25;max-width:18ch;margin:0 auto 14px}
+.hush p{color:rgba(251,239,217,.72);font-size:16px;max-width:42ch;margin:0 auto 26px}
+.hush button{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;
+  color:#FBEFD9;background:transparent;border:1.5px solid rgba(251,239,217,.4);
+  border-radius:999px;padding:11px 22px;cursor:pointer}
+.hush button:hover{background:rgba(251,239,217,.12)}
+.foot{margin-top:44px;padding-top:20px;border-top:1px dashed var(--seam);
+  font-size:14px;color:var(--mute);max-width:66ch;line-height:1.7}
+.foot b{color:var(--ink2);font-weight:600}
+</style></head><body>
+<div class="wrap">
+  <div class="top" id="top"></div>
+  <div class="nav" id="nav"></div>
+  <div id="app"></div>
+</div>
+
+<dialog id="auth"><form method="dialog" class="sheet">
+  <h3>Sign in</h3>
+  <div class="sub2">Three ways in, because the three of you are not doing the same thing.</div>
+  <div class="roles">
+    <button type="button" class="role on" data-r="volunteer"><h4>I'm giving my time</h4>
+      <p>Your shifts, your delivery runs, and where to go when you get there.</p>
+      <span class="ask">a name and an email &middot; no password</span></button>
+    <button type="button" class="role" data-r="provider"><h4>I'm giving goods</h4>
+      <p>The squares you promised, and where to drop them off.</p>
+      <span class="ask">a name and an email &middot; no password</span></button>
+    <button type="button" class="role" data-r="admin"><h4>I'm running the drive</h4>
+      <p>Everyone who asked, everyone who helped, and who is still waiting.</p>
+      <span class="ask">email and a password &middot; you'll see real names</span></button>
+    <button type="button" class="role" data-r="family"><h4>I asked for something</h4>
+      <p>Check where your request has got to. No account, ever.</p>
+      <span class="ask">just the two words on your slip</span></button>
+  </div>
+
+  <div class="pane on" id="p-volunteer">
+    <div class="sl">Your name</div><input class="in" id="vname" maxlength="34" placeholder="Thomas">
+    <div class="sl">Where we send your run sheet</div><input class="in" type="email" placeholder="you@example.com">
+    <div class="rowb"><button class="btn" type="button" onclick="doSignIn('volunteer')">Send me a link</button>
+      <button class="no" type="submit">Not now</button></div></div>
+
+  <div class="pane" id="p-provider">
+    <div class="sl">Your name, or your family's</div><input class="in" id="pname" maxlength="34" placeholder="the Okonkwo family">
+    <div class="sl">Where we send the drop-off details</div><input class="in" type="email" placeholder="you@example.com">
+    <div class="rowb"><button class="btn" type="button" onclick="(function(){document.getElementById('vname').value=document.getElementById('pname').value;doSignIn('provider');})()">Send me a link</button>
+      <button class="no" type="submit">Not now</button></div></div>
+
+  <div class="pane" id="p-admin">
+    <div class="sl">Organisation</div><input class="in" id="aname" maxlength="40" placeholder="Northside Trust">
+    <div class="sl">Password</div><input class="in" type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+    <div class="rowb"><button class="btn" type="button" onclick="doSignIn('admin')">Sign in</button>
+      <button class="no" type="submit">Not now</button></div></div>
+
+  <div class="pane" id="p-family">
+    <div class="sl">The two words on your slip</div>
+    <input class="in" id="fem" maxlength="30" placeholder="The Winter Wren" style="font-family:Fraunces,Georgia,serif;font-size:19px;font-style:italic">
+    <div class="rowb"><button class="btn" type="button" onclick="doSignIn('family')">Check on my request</button>
+      <button class="no" type="submit">Not now</button></div>
+    <div class="note">If you have lost the slip, ring the number on your text. We will never ask you to prove who you are to get an answer about your own request.</div></div>
+
+  <div class="priv">You'll notice the people <b>asking</b> for help are asked for the least. That's on purpose. What you have to prove scales with what you're being trusted with, not with what you need.</div>
+</form></dialog>
+
+<dialog id="dlg"><form method="dialog" class="sheet">
+  <h3 id="dneed"></h3>
+  <div class="sub2">You're taking this one on. It stops being a number the moment you do.</div>
+  <div class="sl">Choose your fabric</div>
+  <div class="fabrics" id="fabs"></div>
+  <div class="sl">Who should we say stitched it in?</div>
+  <input class="in" id="dname" maxlength="34" placeholder="your name, or your family, or your church">
+  <div class="rowb"><button class="btn warm" type="button" onclick="stitchIn()">Stitch it in</button>
+    <button class="no" type="submit">Not this one</button></div>
+  <div class="priv">You'll get the drop-off details by text. You will never see this household's name or address &mdash; the organisers handle the handover, the way the family chose to receive it.</div>
+</form></dialog>
+
+<div class="hush" id="hush"><div>
+  <h2>The quilt is finished. Nobody is left waiting.</h2>
+  <p>Twelve households, twelve squares, and not one of them stood in a line for it.</p>
+  <button onclick="document.getElementById('hush').classList.remove('on')">Look at the quilt</button>
+</div></div>
+
+<script>
+/* Minimal QR encoder - byte mode, EC level M, versions 1..10, all 8 masks scored.
+   Vanilla, no dependencies, so the whole app stays one self-contained file. */
+var QR=(function(){
+  var EXP=[],LOG=[];
+  (function(){var x=1;for(var i=0;i<256;i++){EXP[i]=x;LOG[x]=i;x<<=1;if(x&256)x^=0x11D;}})();
+  function mul(a,b){return (a===0||b===0)?0:EXP[(LOG[a]+LOG[b])%255];}
+  function rsPoly(n){var p=[1];for(var i=0;i<n;i++){var q=[1,EXP[i]],r=[];
+    for(var j=0;j<p.length+1;j++)r[j]=0;
+    for(var a=0;a<p.length;a++)for(var b=0;b<2;b++)r[a+b]^=mul(p[a],q[b]);
+    p=r;}return p;}
+  /* data codewords / ec-per-block / blocks, EC level M, versions 1..10 */
+  var V=[null,
+    {t:26,e:10,b:1},{t:44,e:16,b:1},{t:70,e:26,b:1},{t:100,e:18,b:2},{t:134,e:24,b:2},
+    {t:172,e:16,b:4},{t:196,e:18,b:4},{t:242,e:22,b:4},{t:292,e:22,b:5},{t:346,e:26,b:5}];
+  function cap(v){var s=V[v];return s.t-s.e*s.b;}
+
+  function make(text){
+    var bytes=[],i;
+    for(i=0;i<text.length;i++){var c=text.charCodeAt(i);
+      if(c<128)bytes.push(c);
+      else if(c<2048){bytes.push(192|c>>6,128|c&63);}
+      else {bytes.push(224|c>>12,128|c>>6&63,128|c&63);}}
+    var ver=1;while(ver<10&&bytes.length+ (ver<10?2:3) > cap(ver))ver++;
+    var spec=V[ver],total=cap(ver);
+    /* bit stream: mode 0100, length, data, terminator */
+    var bits=[];
+    function put(val,len){for(var k=len-1;k>=0;k--)bits.push((val>>k)&1);}
+    put(4,4); put(bytes.length,8);
+    for(i=0;i<bytes.length;i++)put(bytes[i],8);
+    for(i=0;i<4&&bits.length<total*8;i++)bits.push(0);
+    while(bits.length%8)bits.push(0);
+    var data=[];for(i=0;i<bits.length;i+=8){var b=0;for(var j=0;j<8;j++)b=(b<<1)|bits[i+j];data.push(b);}
+    var pad=[236,17],pi=0;while(data.length<total)data.push(pad[pi++%2]);
+
+    /* split into blocks, compute EC, interleave */
+    var nb=spec.b, base=Math.floor(total/nb), extra=total%nb, blocks=[],ecs=[],p=0;
+    var gp=rsPoly(spec.e);
+    for(i=0;i<nb;i++){
+      var len=base+(i>=nb-extra?1:0), blk=data.slice(p,p+len);p+=len;
+      blocks.push(blk);
+      var rem=blk.concat(new Array(spec.e).fill(0));
+      for(var d=0;d<blk.length;d++){var f=rem[d];if(f!==0)
+        for(var g=1;g<gp.length;g++)rem[d+g]^=mul(gp[g],f);}
+      ecs.push(rem.slice(blk.length));
+    }
+    var out=[],mx=Math.max.apply(null,blocks.map(function(b){return b.length;}));
+    for(i=0;i<mx;i++)for(var k2=0;k2<nb;k2++)if(i<blocks[k2].length)out.push(blocks[k2][i]);
+    for(i=0;i<spec.e;i++)for(var k3=0;k3<nb;k3++)out.push(ecs[k3][i]);
+
+    /* lay out the matrix */
+    var n=17+ver*4, m=[],res=[];
+    for(i=0;i<n;i++){m[i]=[];res[i]=[];for(var j2=0;j2<n;j2++){m[i][j2]=0;res[i][j2]=0;}}
+    function fn(r,c){ if(r<0||c<0||r>=n||c>=n)return; m[r][c]=1;res[r][c]=1; }
+    function set(r,c,v){ if(r<0||c<0||r>=n||c>=n)return; m[r][c]=v;res[r][c]=1; }
+    function finder(r,c){for(var a=-1;a<8;a++)for(var b=-1;b<8;b++){
+      if(r+a<0||c+b<0||r+a>=n||c+b>=n)continue;
+      var on=(a>=0&&a<=6&&(b===0||b===6))||(b>=0&&b<=6&&(a===0||a===6))||(a>=2&&a<=4&&b>=2&&b<=4);
+      set(r+a,c+b,on?1:0);}}
+    finder(0,0);finder(0,n-7);finder(n-7,0);
+    for(i=8;i<n-8;i++){set(6,i,i%2?0:1);set(i,6,i%2?0:1);}
+    if(ver>1){var al=[6,n-7];
+      for(var x1=0;x1<al.length;x1++)for(var y1=0;y1<al.length;y1++){
+        var ar=al[y1],ac=al[x1];
+        if((ar===6&&ac===6)||(ar===6&&ac===n-7)||(ar===n-7&&ac===6))continue;
+        for(var a2=-2;a2<=2;a2++)for(var b2=-2;b2<=2;b2++)
+          set(ar+a2,ac+b2,(Math.abs(a2)===2||Math.abs(b2)===2||(a2===0&&b2===0))?1:0);}}
+    for(i=0;i<9;i++){if(i!==6){res[8][i]=1;res[i][8]=1;}}
+    for(i=0;i<8;i++){res[8][n-1-i]=1;res[n-1-i][8]=1;}
+    set(n-8,8,1);
+
+    /* place data, zig-zag from bottom right */
+    var bi=0,dir=-1,row=n-1;
+    for(var col=n-1;col>0;col-=2){ if(col===6)col--;
+      while(true){ for(var s2=0;s2<2;s2++){ var cc=col-s2;
+          if(!res[row][cc]){ var bit=0;
+            if(bi<out.length*8){bit=(out[bi>>3]>>(7-(bi&7)))&1;}
+            m[row][cc]=bit; bi++; } }
+        row+=dir; if(row<0||row>=n){row-=dir;dir=-dir;break;} } }
+
+    /* pick the mask with the lowest penalty */
+    function maskAt(k,r,c){switch(k){
+      case 0:return (r+c)%2===0; case 1:return r%2===0; case 2:return c%3===0;
+      case 3:return (r+c)%3===0; case 4:return (Math.floor(r/2)+Math.floor(c/3))%2===0;
+      case 5:return (r*c)%2+(r*c)%3===0; case 6:return ((r*c)%2+(r*c)%3)%2===0;
+      default:return ((r+c)%2+(r*c)%3)%2===0;}}
+    var FMT=[0x5412,0x5125,0x5E7C,0x5B4B,0x45F9,0x40CE,0x4F97,0x4AA0]; /* level M, mask 0..7 */
+    var best=null,bestPen=Infinity;
+    for(var k4=0;k4<8;k4++){
+      var g2=[];for(i=0;i<n;i++){g2[i]=[];for(var j3=0;j3<n;j3++)
+        g2[i][j3]=res[i][j3]?m[i][j3]:(m[i][j3]^(maskAt(k4,i,j3)?1:0));}
+      var f2=FMT[k4];
+      for(i=0;i<15;i++){var b3=(f2>>i)&1;
+        if(i<6)g2[8][i]=b3; else if(i<8)g2[8][i+1]=b3; else g2[8][n-15+i]=b3;
+        if(i<8)g2[n-1-i][8]=b3; else if(i<9)g2[15-i][8]=b3; else g2[14-i][8]=b3;}
+      g2[n-8][8]=1;
+      /* penalty: runs of 5+, 2x2 blocks, dark ratio */
+      var pen=0,dark=0;
+      for(i=0;i<n;i++){var rr=1,cr=1;
+        for(var j4=1;j4<n;j4++){
+          rr=(g2[i][j4]===g2[i][j4-1])?rr+1:1; if(rr===5)pen+=3; else if(rr>5)pen++;
+          cr=(g2[j4][i]===g2[j4-1][i])?cr+1:1; if(cr===5)pen+=3; else if(cr>5)pen++;}}
+      for(i=0;i<n-1;i++)for(var j5=0;j5<n-1;j5++){
+        var v0=g2[i][j5];
+        if(v0===g2[i][j5+1]&&v0===g2[i+1][j5]&&v0===g2[i+1][j5+1])pen+=3;}
+      for(i=0;i<n;i++)for(var j6=0;j6<n;j6++)if(g2[i][j6])dark++;
+      pen+=Math.floor(Math.abs(dark*100/(n*n)-50)/5)*10;
+      if(pen<bestPen){bestPen=pen;best=g2;}
+    }
+    return best;
+  }
+
+  /* render to an SVG string - crisp at any size, prints fine */
+  function svg(text,px,fg,bg){
+    var g=make(text),n=g.length,q=4,d=n+q*2,s="";
+    for(var r=0;r<n;r++){var run=0;
+      for(var c=0;c<n;c++){
+        if(g[r][c])run++;
+        if((!g[r][c]||c===n-1)&&run){var w=run,x=(c+(g[r][c]?1:0))-run+q;
+          s+='<rect x="'+x+'" y="'+(r+q)+'" width="'+w+'" height="1"/>';run=0;}}}
+    return '<svg viewBox="0 0 '+d+' '+d+'" width="'+px+'" height="'+px+'" '+
+      'shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">'+
+      '<rect width="'+d+'" height="'+d+'" fill="'+(bg||"#fff")+'"/>'+
+      '<g fill="'+(fg||"#000")+'">'+s+'</g></svg>';
+  }
+  return {svg:svg,make:make};
+})();
+
+/* ---------------- fabrics + real quilt blocks ---------------- */
+var FAB=[
+ {n:"amber", a:"#B8762E",b:"#E3BB84"},{n:"sage",  a:"#5B7B62",b:"#A8C0A4"},
+ {n:"plum",  a:"#7C6A9C",b:"#BCAFD2"},{n:"ochre", a:"#C08B3E",b:"#E6C78A"},
+ {n:"teal",  a:"#4F7383",b:"#9DBAC4"},{n:"rose",  a:"#B5697A",b:"#E0B0B8"},
+ {n:"navy",  a:"#22304F",b:"#8E9BB6"},{n:"moss",  a:"#6E7A46",b:"#BCC48F"}
+];
+var CREAM="#F7F0E3";
+function block(kind,f,ghost){
+  var a=ghost?"#C9CFDA":f.a, b=ghost?"#DFE3EA":f.b, g=ghost?"#EFE6D6":CREAM;
+  var s='<svg class="blk" viewBox="0 0 60 60" preserveAspectRatio="none" aria-hidden="true">';
+  s+='<rect width="60" height="60" fill="'+g+'"/>';
+  if(kind===0){
+    s+='<path d="M0 0h30v30H0z" fill="'+b+'"/><path d="M0 0h30L0 30z" fill="'+a+'"/>';
+    s+='<path d="M30 0h30v30H30z" fill="'+a+'"/><path d="M60 0v30H30z" fill="'+b+'"/>';
+    s+='<path d="M0 30h30v30H0z" fill="'+a+'"/><path d="M0 60V30h30z" fill="'+b+'"/>';
+    s+='<path d="M30 30h30v30H30z" fill="'+b+'"/><path d="M60 60H30V30z" fill="'+a+'"/>';
+  }else if(kind===1){
+    for(var r=0;r<3;r++)for(var c=0;c<3;c++)
+      s+='<rect x="'+c*20+'" y="'+r*20+'" width="20" height="20" fill="'+((r+c)%2?b:a)+'"/>';
+  }else if(kind===2){
+    var cs=[a,b,a,b,a,b];
+    for(var i=0;i<6;i++){var p=i*5;
+      s+='<rect x="'+p+'" y="'+p+'" width="'+(60-p*2)+'" height="'+(60-p*2)+'" fill="'+cs[i]+'"/>';}
+    s+='<rect x="26" y="26" width="8" height="8" fill="'+a+'"/>';
+  }else if(kind===3){
+    for(var k=0;k<4;k++){var y=k*15;
+      s+='<rect y="'+y+'" width="60" height="15" fill="'+b+'"/>';
+      s+='<path d="M0 '+(y+15)+'L30 '+y+'L60 '+(y+15)+'z" fill="'+a+'"/>';}
+  }else if(kind===4){
+    s+='<path d="M30 30L0 0h30z" fill="'+a+'"/><path d="M30 30L60 0v30z" fill="'+b+'"/>';
+    s+='<path d="M30 30L60 60H30z" fill="'+a+'"/><path d="M30 30L0 60V30z" fill="'+b+'"/>';
+    s+='<path d="M30 30L30 0h30z" fill="'+b+'"/><path d="M30 30L60 30v30z" fill="'+a+'"/>';
+    s+='<path d="M30 30L30 60H0z" fill="'+b+'"/><path d="M30 30L0 30V0z" fill="'+a+'"/>';
+  }else if(kind===5){
+    s+='<rect width="60" height="60" fill="'+b+'"/><rect x="20" y="20" width="20" height="20" fill="'+a+'"/>';
+    s+='<path d="M20 20L30 0l10 20z" fill="'+a+'"/><path d="M40 20L60 30 40 40z" fill="'+a+'"/>';
+    s+='<path d="M40 40L30 60 20 40z" fill="'+a+'"/><path d="M20 40L0 30l20-10z" fill="'+a+'"/>';
+  }else if(kind===6){
+    for(var q=0;q<4;q++)for(var r2=0;r2<4;r2++){var x=q*15,yy=r2*15,alt=(q+r2)%2;
+      s+='<rect x="'+x+'" y="'+yy+'" width="15" height="5" fill="'+(alt?a:b)+'"/>';
+      s+='<rect x="'+x+'" y="'+(yy+5)+'" width="15" height="5" fill="'+(alt?b:a)+'"/>';
+      s+='<rect x="'+x+'" y="'+(yy+10)+'" width="15" height="5" fill="'+(alt?a:b)+'"/>';}
+  }else{
+    s+='<rect x="4" y="4" width="22" height="22" fill="'+a+'"/><rect x="34" y="4" width="22" height="22" fill="'+b+'"/>';
+    s+='<rect x="4" y="34" width="22" height="22" fill="'+b+'"/><rect x="34" y="34" width="22" height="22" fill="'+a+'"/>';
+    s+='<circle cx="30" cy="30" r="9" fill="'+a+'"/><circle cx="30" cy="30" r="4.5" fill="'+g+'"/>';
+  }
+  s+='<path d="M0 15h60M0 30h60M0 45h60M15 0v60M30 0v60M45 0v60" stroke="rgba(255,255,255,.15)" stroke-width="1" stroke-dasharray="2 3"/>';
+  return s+'</svg>';
+}
+function esc(t){return String(t==null?"":t).replace(/[&<>"]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function pinSvg(){return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4E5566" stroke-width="2"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>';}
+
+/* ---------------- the drive ---------------- */
+var DRIVE={name:"Northside Winter Drive",ends:"14 December",org:"Northside Trust"};
+var SQUARES=[
+ {t:"A family of five &middot; warm coats, two children under six",s:"wait",days:3},
+ {t:"A grandmother raising two &middot; groceries for the week",s:"held",by:"Maria",note:"dropping off Thursday",f:1,k:2},
+ {t:"A teenager &middot; nobody has claimed anything for this age yet",s:"wait",days:6},
+ {t:"A single dad, three kids &middot; winter boots",s:"held",by:"the Okonkwo family",note:"packed",f:2,k:5},
+ {t:"A newborn arriving in January &middot; anything at all",s:"held",by:"Dev",note:"delivered",f:3,k:0},
+ {t:"Two sisters, 9 and 11 &middot; a warm bed each",s:"wait",days:2},
+ {t:"An older couple &middot; heating oil and a hot meal",s:"held",by:"St Anne's",note:"delivered",f:4,k:3},
+ {t:"A family of three &middot; nothing specified, they didn't want to ask",s:"wait",days:8},
+ {t:"A mum on her own &middot; a winter coat, size 12",s:"held",by:"the Reyes family",note:"packed",f:5,k:1},
+ {t:"A boy of seven who loses track of time building things",s:"wait",days:1},
+ {t:"Someone living alone &middot; a hot meal and company",s:"held",by:"Tomas",note:"delivered",f:6,k:6},
+ {t:"A family of six &middot; bedding, and the heating is off",s:"wait",days:4}
+];
+SQUARES.forEach(function(d,i){if(d.k===undefined)d.k=(i*3+1)%8;});
+
+var TASKS=[
+ {when:"Today<br>9:00",t:"Sorting warm coats and bedding",where:"Lower hall, tables along the north wall",st:"wait"},
+ {when:"Today<br>13:30",t:"North neighbourhood delivery run",where:"Loading bay behind the church",st:"wait"},
+ {when:"Sat<br>10:00",t:"Morning collection desk",where:"Front entrance table by the steps",st:"done"}
+];
+var PLEDGES=[
+ {t:"Warm coats &times; 4",st:"wait",note:"Stitched to your name. Waiting for drop-off."},
+ {t:"Bedding for two",st:"done",note:"Received at the hall and folded into the drive."}
+];
+var JOURNAL=[
+ {d:"Tuesday, 3 December",t:"The hall is warm and ready",
+  p:"The board opened this morning with unsewn squares across the hall. Arthur brought three boxes of heavy knit gloves before nine, and Martha set up the packing tables by the heaters. We are still finding our rhythm, but the hall is warm and ready."},
+ {d:"Friday, 6 December",t:"Parcels stacking up at the back",
+  p:"Several more squares were stitched in today, mostly for warm boots and bedding. David spent the afternoon loading vans while Clara sorted woollen socks by size. The room at the back of the hall is filling up with parcels ready to go."},
+ {d:"Wednesday, 11 December",t:"We are short on children's coats",
+  p:"We are falling behind on children's winter coats, and several squares are stuck waiting because of it. Our storage shelves for heavy outerwear were completely bare by five o'clock. Sarah is reaching out to nearby community groups tomorrow morning to see if we can find more."},
+ {d:"Monday, 16 December",t:"Every parcel reached a porch before dark",
+  p:"A steady day at the hall despite the sleet outside. Thomas and Elena drove the northern delivery route so that every parcel reached a front porch before dark. Only a few squares remain on the board tonight, and the quilt is almost whole."}
+];
+var SPONSORS=["Kirkby & Sons Hardware","The Corner Bakery","Northside Dental","Lena's Flowers"];
+
+/* ---------------- state ---------------- */
+var ME=null, VIEW="quilt", FILTER="all", pickFab=0, pickIdx=-1;
+var $=function(id){return document.getElementById(id);};
+function waiting(){return SQUARES.filter(function(d){return d.s==="wait";});}
+function fabFor(name){return FAB[(String(name).length*3+String(name).charCodeAt(0))%8];}
+
+/* ---------------- shell ---------------- */
+function header(){
+  var h='<button class="brand" onclick="go(\'quilt\')">Patchwork</button>'+
+        '<span class="drivepick">'+DRIVE.name+' &middot; ends '+DRIVE.ends+'</span><span class="spacer"></span>';
+  if(!ME) h+='<button class="btn ghost" onclick="openAuth()">Sign in</button>'+
+             '<button class="btn" onclick="go(\'ask\')">Ask for something</button>';
+  else {
+    var f=fabFor(ME.name);
+    h+='<span class="me"><span class="sw">'+block(2,f,false)+'</span>'+
+       '<span>'+esc(ME.name)+'</span><span class="role-pill">'+ME.role+'</span>'+
+       '<button class="no" style="padding:4px" onclick="signOut()">sign out</button></span>';
+  }
+  $("top").innerHTML=h;
+  var tabs=[["quilt","The quilt"],["journal","Drive journal"],["sponsor","Sponsor a drive"]];
+  if(ME&&ME.role==="volunteer") tabs.splice(1,0,["mine","My tasks"]);
+  if(ME&&ME.role==="provider")  tabs.splice(1,0,["mine","My pledges"]);
+  if(ME&&ME.role==="admin")     tabs.splice(1,0,["mine","Run the drive"],["people","Everyone"]);
+  if(ME&&ME.role==="family")    tabs=[["slip","My request"],["journal","Drive journal"]];
+  $("nav").innerHTML=tabs.map(function(t){
+    return '<button class="'+(VIEW===t[0]?"on":"")+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>';}).join("");
+}
+function go(v){VIEW=v;render();window.scrollTo(0,0);}
+function signOut(){ME=null;VIEW="quilt";render();}
+
+/* ---------------- views ---------------- */
+function countBar(){
+  var w=waiting().length,tot=SQUARES.length;
+  return '<div class="count'+(w?"":" done")+'"><b>'+(w||"Nobody")+'</b>'+
+    '<span class="lab">'+(w===1?"household still waiting":(w?"households still waiting":"is waiting"))+'</span>'+
+    '<span class="sub">'+(tot-w)+' of '+tot+' taken care of<br>'+
+    '<em>'+(w?"longest wait is "+Math.max.apply(null,waiting().map(function(d){return d.days||0;}))+" days":"the quilt is finished")+'</em></span></div>';
+}
+function quiltHTML(){
+  return SQUARES.map(function(d,i){
+    var held=d.s==="held", f=FAB[held?d.f:0], hid=(FILTER==="wait"&&held)?" hide":"";
+    return '<button class="patch '+(held?"held":"waiting")+hid+'" data-i="'+i+'"'+(held?" disabled":"")+'>'+
+      block(d.k,f,!held)+'<span class="stitch"></span><span class="lbl">'+
+      '<span class="tag"><i></i>'+(held?"taken care of":"still waiting")+'</span>'+
+      '<span class="need">'+d.t+'</span>'+
+      (held?'<span class="by">Stitched in by '+esc(d.by)+' &middot; '+esc(d.note)+'</span>'
+           :'<span class="cta">I\'ll volunteer</span>')+
+      '</span></button>';}).join("");
+}
+function contributors(){
+  var seen={},out=[];
+  SQUARES.forEach(function(d){if(d.s==="held"&&!seen[d.by]){seen[d.by]=1;
+    out.push('<span class="person"><span class="sw">'+block(1,FAB[d.f],false)+'</span><b>'+esc(d.by)+'</b></span>');}});
+  return out.join("");
+}
+function vQuilt(){
+  return '<div class="hero"><h1>A drive where <em>nobody waits.</em></h1>'+
+    '<p class="lede">Every other drive counts what came in. This one counts who hasn\'t been reached yet, and the number only goes down.</p></div>'+
+    countBar()+
+    '<div class="bar"><h2>The quilt</h2>'+
+    '<button class="chip '+(FILTER==="all"?"on":"")+'" onclick="setF(\'all\')">Everything</button>'+
+    '<button class="chip '+(FILTER==="wait"?"on":"")+'" onclick="setF(\'wait\')">Only what\'s still waiting</button>'+
+    '<span class="hint">Every square is one household. Take one and it\'s yours to finish.</span></div>'+
+    '<div class="quilt" id="quilt">'+quiltHTML()+'</div>'+
+    '<div class="sect">who is holding a square</div><div class="people">'+contributors()+'</div>'+
+    '<div class="foot"><b>Nobody\'s name appears on this quilt.</b> Households are shown as the shape of what they need, never as who they are. Only the organisers can see who is who, and only because somebody has to hand the coats over.</div>';
+}
+function vMineVolunteer(){
+  var t=TASKS.map(function(k){
+    return '<div class="row"><div class="when">'+k.when+'</div><div class="body">'+
+      '<h4>'+k.t+'</h4><div class="where">'+pinSvg()+esc(k.where)+'</div></div>'+
+      '<div class="side"><span class="pill '+(k.st==="done"?"done":"wait")+'">'+
+      (k.st==="done"?"done":"to do")+'</span></div></div>';}).join("");
+  return '<h1 style="font-size:34px;margin-bottom:6px">Hello, '+esc(ME.name)+'.</h1>'+
+    '<p class="lede">Thank you for giving your time to the drive today.</p>'+
+    '<div class="sect">here are the places where hands are needed right now</div>'+t+
+    '<div class="card" style="margin-top:8px"><div class="qr">'+
+    '<div class="code">'+QR.svg("PATCHWORK:CHECKIN:"+encodeURIComponent(ME.name)+":NORTHSIDE",130,"#22304F","#FEFBF6")+'</div>'+
+    '<div class="txt"><h4>Scan code to check in</h4>'+
+    '<p>When you arrive, please check in at the garden gate before heading to your spot. '+
+    'The organiser scans this, so you never have to find anyone or sign a clipboard.</p></div></div></div>';
+}
+function vMineProvider(){
+  var p=PLEDGES.map(function(k){
+    return '<div class="row"><div class="body"><h4>'+k.t+'</h4>'+
+      '<div class="where" style="margin-top:6px">'+esc(k.note)+'</div></div>'+
+      '<div class="side"><span class="pill '+(k.st==="done"?"done":"wait")+'">'+
+      (k.st==="done"?"received":"not dropped off")+'</span></div></div>';}).join("");
+  return '<h1 style="font-size:34px;margin-bottom:6px">Welcome back, '+esc(ME.name)+'.</h1>'+
+    '<p class="lede">Thank you for taking a square on the quilt.</p>'+
+    '<div class="sect">the squares you have promised for this drive</div>'+p+
+    '<div class="card" style="margin-top:8px"><div class="qr">'+
+    '<div class="code">'+QR.svg("PATCHWORK:DROPOFF:"+encodeURIComponent(ME.name)+":NORTHSIDE",130,"#22304F","#FEFBF6")+'</div>'+
+    '<div class="txt"><h4>Tape this to your bag</h4>'+
+    '<p>Please bring items to the parish hall side door between ten and four on weekdays. '+
+    'Whoever receives it scans this and your square turns warm the same minute.</p></div></div></div>'+
+    '<div class="note" style="max-width:640px">You will not see the family name, to keep their winter quiet and private.</div>';
+}
+function vMineAdmin(){
+  var longest=waiting().sort(function(a,b){return (b.days||0)-(a.days||0);}).slice(0,3);
+  return '<h1 style="font-size:34px;margin-bottom:6px">The quilt today, square by square.</h1>'+
+    '<p class="lede">You are the only person who sees real names, so keep this window private.</p>'+
+    countBar()+
+    '<div class="grid g3" style="margin-top:14px">'+
+      '<div class="card"><div class="muted">still waiting</div><div class="big">'+waiting().length+'</div></div>'+
+      '<div class="card"><div class="muted">volunteers with nothing to do</div><div class="big">2</div></div>'+
+      '<div class="card"><div class="muted">pledges past drop-off</div><div class="big" style="color:var(--warm)">1</div></div>'+
+    '</div>'+
+    '<div class="sect">households waiting longest for an unsewn square to turn warm</div>'+
+    longest.map(function(d){
+      return '<div class="row"><div class="when">'+(d.days||0)+' days</div><div class="body">'+
+        '<h4 style="font-size:17px">'+d.t+'</h4></div><div class="side">'+
+        '<span class="pill '+((d.days||0)>5?"late":"wait")+'">'+((d.days||0)>5?"chase this":"waiting")+'</span></div></div>';}).join("")+
+    '<div class="sect">this pledge is past its drop-off date and may need a quiet follow-up</div>'+
+    '<div class="row"><div class="body"><h4 style="font-size:17px">Warm coats &times; 4 &mdash; promised by R. Alvarez</h4>'+
+      '<div class="where" style="margin-top:6px">Due at the hall two days ago</div></div>'+
+      '<div class="side"><span class="pill late">overdue</span></div></div>'+
+    '<div class="rowb" style="margin-top:20px">'+
+      '<button class="btn" onclick="exportCsv()">Download the drive records as a spreadsheet</button>'+
+      '<span class="muted">names included, so keep the file safe</span></div>';
+}
+function vPeople(){
+  return '<h1 style="font-size:32px;margin-bottom:14px">Everyone on this drive</h1>'+
+   '<div class="sect">giving time</div><div class="people">'+
+   ["Thomas","Elena","Clara","David","Martha"].map(function(n){
+     return '<span class="person"><span class="sw">'+block(4,fabFor(n),false)+'</span><b>'+n+'</b><span>volunteer</span></span>';}).join("")+
+   '</div><div class="sect">giving goods</div><div class="people">'+
+   ["Maria","Dev","Tomas","the Okonkwo family","the Reyes family","St Anne's"].map(function(n){
+     return '<span class="person"><span class="sw">'+block(1,fabFor(n),false)+'</span><b>'+esc(n)+'</b><span>provider</span></span>';}).join("")+
+   '</div><div class="sect">households</div>'+
+   '<div class="note" style="max-width:620px">Twelve households are registered on this drive. Their names are deliberately not listed here, even for you. Open a single square to see the one name you need at the moment you need it.</div>';
+}
+function vJournal(){
+  return '<h1 style="font-size:34px;margin-bottom:8px">Drive journal</h1>'+
+    '<p class="lede" style="margin-bottom:26px">What actually happened, written by the people running it. Everyone can read this, including the households.</p>'+
+    JOURNAL.slice().reverse().map(function(p){
+      return '<div class="post"><div class="date">'+p.d+'</div><h4>'+p.t+'</h4><p>'+p.p+'</p></div>';}).join("");
+}
+function vSponsor(){
+  return '<div class="spon"><h2>Put your name on a whole <em>row of the quilt.</em></h2>'+
+    '<p>A sponsor covers the squares nobody claims. Every drive has them: the teenagers, '+
+    'the awkward sizes, the household that asked for nothing. That is where sponsorship goes first.</p>'+
+    '<div class="tiers">'+
+      '<button class="tier"><b>&pound;50</b><span>One square. One household who would otherwise still be waiting on the last day.</span></button>'+
+      '<button class="tier"><b>&pound;250</b><span>A row of five, and your name on the drive journal.</span></button>'+
+      '<button class="tier"><b>&pound;600</b><span>Sponsor the whole drive. Your name sits under the count all winter.</span></button>'+
+    '</div>'+
+    '<div class="sect" style="color:rgba(234,226,212,.6);margin-top:26px">already sponsoring this winter</div>'+
+    '<div class="sponsors">'+SPONSORS.map(function(s){return '<span class="s">'+esc(s)+'</span>';}).join("")+'</div>'+
+    '</div>'+
+    '<div class="foot"><b>Sponsors never see a household.</b> They see the same quilt everyone else sees, and a receipt.</div>';
+}
+function vSlip(){
+  var em=ME?ME.name:"The Winter Wren";
+  return '<div class="slip"><div class="muted" style="letter-spacing:.14em;text-transform:uppercase;font-size:10.5px;font-weight:600">your slip</div>'+
+    '<div class="em">'+esc(em)+'</div>'+
+    '<p style="color:var(--ink2)">Here is where things stand with your square. You will never have to stand in a queue or explain your situation to anyone.</p>'+
+    '<div class="steps">'+
+      '<div class="step done"><span class="dot">&#10003;</span><div><h4>We have your note</h4><p>Your square is on the quilt board.</p></div></div>'+
+      '<div class="step now"><span class="dot">&bull;</span><div><h4>A neighbour has taken your square</h4><p>They are putting everything together now. You do not need to call or wonder.</p></div></div>'+
+      '<div class="step todo"><span class="dot"></span><div><h4>Ready for a quiet handover</h4><p>We will text you the moment it is ready, with the way you asked to receive it.</p></div></div>'+
+    '</div>'+
+    '<div class="note">If you have lost this slip, ring the number on your text. We will never ask you to prove who you are to get an answer about your own request.</div>'+
+    '</div>';
+}
+function vAsk(){
+  return '<div class="hero"><h1>Tell us <em>who is around your table.</em></h1>'+
+    '<p class="lede">No documents. No queue. Nobody sees your name except the people packing the box.</p></div>'+
+    '<div class="card" style="max-width:640px;margin-top:22px">'+
+    '<div class="sl">who is at home</div>'+
+    '<div class="rowb" style="margin-bottom:18px">'+
+      '<button class="btn ghost" onclick="addWho(\'a child\')">+ a child</button>'+
+      '<button class="btn ghost" onclick="addWho(\'a teenager\')">+ a teenager</button>'+
+      '<button class="btn ghost" onclick="addWho(\'a grown-up\')">+ a grown-up</button>'+
+      '<button class="btn ghost" onclick="addWho(\'an elder\')">+ an elder</button></div>'+
+    '<div class="people" id="whoList" style="margin-bottom:18px"></div>'+
+    '<div class="sl">what would make the biggest difference</div>'+
+    '<input class="in" placeholder="warm coats, or a hot meal, or you do not have to say">'+
+    '<div class="sl">and if there is a child, what makes them lose track of time?</div>'+
+    '<input class="in" placeholder="building things, drawing, anything at all">'+
+    '<div class="sl">how would you like to receive it</div>'+
+    '<div class="rowb" style="margin-bottom:18px">'+
+      '<button class="btn ghost">Left quietly on the doorstep</button>'+
+      '<button class="btn ghost">Pull up and we load the boot</button>'+
+      '<button class="btn ghost">A ten minute window, no line</button></div>'+
+    '<button class="btn warm" onclick="go(\'slip\')">Send this quietly</button>'+
+    '<div class="priv">We ask what a child loves because a present chosen for &ldquo;a boy, 9&rdquo; is a present that gets left in a cupboard. You will get a slip with two words on it, and that is the only thing you will ever need to check on this.</div>'+
+    '</div>';
+}
+function addWho(k){var l=$("whoList");
+  l.insertAdjacentHTML("beforeend",'<span class="person" style="padding-left:13px"><b>'+k+'</b></span>');}
+
+function render(){
+  header();
+  var v=VIEW,h="";
+  if(v==="mine"&&ME){h=ME.role==="volunteer"?vMineVolunteer():ME.role==="provider"?vMineProvider():vMineAdmin();}
+  else if(v==="people")h=vPeople();
+  else if(v==="journal")h=vJournal();
+  else if(v==="sponsor")h=vSponsor();
+  else if(v==="slip")h=vSlip();
+  else if(v==="ask")h=vAsk();
+  else h=vQuilt();
+  $("app").innerHTML=h;
+}
+function setF(f){FILTER=f;render();}
+
+/* ---------------- claiming a square ---------------- */
+document.addEventListener("click",function(e){
+  var p=e.target.closest(".patch"); if(!p||p.disabled)return;
+  pickIdx=+p.dataset.i;
+  $("dneed").innerHTML=SQUARES[pickIdx].t;
+  $("fabs").innerHTML=FAB.map(function(f,i){
+    return '<button type="button" class="fab'+(i===pickFab?" on":"")+'" data-f="'+i+'">'+block(i%8,f,false)+'</button>';}).join("");
+  if(ME&&ME.name)$("dname").value=ME.name;
+  $("dlg").showModal();
+});
+document.addEventListener("click",function(e){
+  var b=e.target.closest(".fab"); if(!b)return;
+  document.querySelectorAll(".fab").forEach(function(x){x.classList.remove("on");});
+  b.classList.add("on"); pickFab=+b.dataset.f;
+});
+function stitchIn(){
+  var nm=$("dname").value.trim()||"a neighbour";
+  SQUARES[pickIdx].s="held"; SQUARES[pickIdx].f=pickFab;
+  SQUARES[pickIdx].by=nm; SQUARES[pickIdx].note="just taken on";
+  var idx=pickIdx; $("dlg").close(); render();
+  var el=document.querySelector('#quilt [data-i="'+idx+'"]');
+  if(el){el.classList.add("sewing");el.scrollIntoView({block:"center",behavior:"smooth"});}
+  if(!waiting().length)setTimeout(function(){$("hush").classList.add("on");},1100);
+}
+
+/* ---------------- sign in ---------------- */
+function openAuth(){$("auth").showModal();}
+document.addEventListener("click",function(e){
+  var r=e.target.closest(".role"); if(!r)return;
+  document.querySelectorAll(".role").forEach(function(x){x.classList.remove("on");});
+  document.querySelectorAll(".pane").forEach(function(x){x.classList.remove("on");});
+  r.classList.add("on"); $("p-"+r.dataset.r).classList.add("on");
+});
+function doSignIn(kind){
+  var v=$(kind==="family"?"fem":kind==="admin"?"aname":"vname").value.trim();
+  if(!v)v=kind==="family"?"The Winter Wren":kind==="admin"?"Northside Trust":"a neighbour";
+  ME={name:v,role:kind};
+  VIEW=kind==="family"?"slip":"mine";
+  $("auth").close(); render();
+}
+
+/* ---------------- export ---------------- */
+function exportCsv(){
+  var rows=[["square","status","need","held_by","days_waiting"]];
+  SQUARES.forEach(function(d,i){rows.push([i+1,d.s==="held"?"taken care of":"still waiting",
+    d.t.replace(/&middot;/g,"-").replace(/"/g,"'"),d.by||"",d.days||0]);});
+  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c)+'"';}).join(",");}).join("\n");
+  var url=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  var a=document.createElement("a");a.href=url;a.download="northside-winter-drive.csv";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},3000);
+}
+render();
+</script>
+</body></html>
