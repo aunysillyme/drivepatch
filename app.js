@@ -431,9 +431,9 @@ function vSponsor(){
     '<p>A sponsor covers the squares nobody claims. Every drive has them: the teenagers, '+
     'the awkward sizes, the household that asked for nothing. That is where sponsorship goes first.</p>'+
     '<div class="tiers">'+
-      '<button class="tier"><b>&pound;50</b><span>One square. One household who would otherwise still be waiting on the last day.</span></button>'+
-      '<button class="tier"><b>&pound;250</b><span>A row of five, and your name on the drive journal.</span></button>'+
-      '<button class="tier"><b>&pound;600</b><span>Sponsor the whole drive. Your name sits under the count all winter.</span></button>'+
+      '<button class="tier"><b>$60</b><span>One square. One household who would otherwise still be waiting on the last day.</span></button>'+
+      '<button class="tier"><b>$300</b><span>A row of five, and your name on the drive journal.</span></button>'+
+      '<button class="tier"><b>$750</b><span>Sponsor the whole drive. Your name sits under the count all winter.</span></button>'+
     '</div>'+
     '<div class="sect" style="color:rgba(234,226,212,.6);margin-top:26px">already sponsoring this winter</div>'+
     '<div class="sponsors">'+SPONSORS.map(function(s){return '<span class="s">'+esc(s)+'</span>';}).join("")+'</div>'+
