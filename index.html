@@ -19,8 +19,8 @@ html{scroll-behavior:smooth}
 body{background:var(--paper);color:var(--ink);
   font-family:Inter,system-ui,sans-serif;font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
 /* the heart field sits under the weave, both under everything else */
-svg.hearts{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+svg.hearts{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.15}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.15;
   background-image:repeating-linear-gradient(0deg,rgba(130,139,156,.05) 0 1px,transparent 1px 3px),
                    repeating-linear-gradient(90deg,rgba(130,139,156,.05) 0 1px,transparent 1px 3px)}
 .wrap{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:22px 20px 90px}
@@ -1687,7 +1687,8 @@ function openAddHh(){
 
 /* ---------------- faded hearts behind everything ----------------
    Deterministic scatter, not random, so it never reflows or flickers between
-   renders. Around 10% opacity - halved again from 21%, Auny's call. */
+   renders. The whole layer sits at 15% opacity (svg.hearts in style.css), so
+   each heart is drawn solid and the layer does the fading. Auny's call. */
 function heartField(){
   var seed=20261128;
   function rnd(){seed=(seed*1103515245+12345)&0x7FFFFFFF;return seed/0x7FFFFFFF;}
@@ -1698,7 +1699,7 @@ function heartField(){
     var x=rnd()*100, y=rnd()*100,
         s=0.5+rnd()*1.5,
         rot=(rnd()*50-25).toFixed(1),
-        op=(0.085+rnd()*0.03825).toFixed(3),
+        op=1,
         c=tones[Math.floor(rnd()*tones.length)];
     out+='<g transform="translate('+x.toFixed(2)+' '+y.toFixed(2)+') rotate('+rot+') scale('+
       (s*0.16).toFixed(3)+')" opacity="'+op+'"><path d="'+P+'" fill="'+c+'" transform="translate(-12 -12)"/></g>';

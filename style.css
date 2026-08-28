@@ -11,8 +11,8 @@ html{scroll-behavior:smooth}
 body{background:var(--paper);color:var(--ink);
   font-family:Inter,system-ui,sans-serif;font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
 /* the heart field sits under the weave, both under everything else */
-svg.hearts{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+svg.hearts{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.15}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.15;
   background-image:repeating-linear-gradient(0deg,rgba(130,139,156,.05) 0 1px,transparent 1px 3px),
                    repeating-linear-gradient(90deg,rgba(130,139,156,.05) 0 1px,transparent 1px 3px)}
 .wrap{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:22px 20px 90px}
