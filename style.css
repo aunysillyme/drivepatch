@@ -338,3 +338,8 @@ dialog::backdrop{background:rgba(32,36,46,.5);backdrop-filter:blur(3px)}
 .petlink{background:none;border:0;padding:0;font:inherit;color:var(--ink);cursor:pointer;
   text-decoration:underline;text-decoration-color:var(--seam);text-underline-offset:3px}
 .petlink:hover{text-decoration-color:var(--navy);color:var(--navy)}
+
+/* a task row that is a link */
+.rowlink{width:100%;text-align:left;font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+.rowlink:hover{border-color:var(--navy);background:var(--cream)}
+.rowlink .side{align-items:flex-end;gap:5px}
