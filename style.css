@@ -378,3 +378,24 @@ table.reg .muted{font-size:12.5px}
 .chip.pets svg{color:var(--warm)}
 .chip.pets.on svg{color:var(--warm2)}
 .patch.ispet.waiting::before{border-color:rgba(184,118,46,.55)}
+
+/* ---------- buy a volunteer a coffee ---------- */
+.vlist{display:grid;gap:10px}
+.vrow{display:flex;align-items:center;gap:14px;background:var(--cream);
+  border:1.5px solid var(--seam);border-radius:5px;padding:14px 17px}
+.vrow .sw{width:40px;height:40px;border-radius:50%;overflow:hidden;flex:none;display:block;
+  border:1.5px solid var(--seam)}
+.vrow .sw svg{width:100%;height:100%;display:block}
+.vrow .vb{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.vrow .vb b{font-family:Fraunces,Georgia,serif;font-size:19px;font-weight:400;color:var(--ink)}
+.vrow .vb span{font-size:14px;color:var(--ink2);line-height:1.45}
+.vrow .vb .vh{font-size:12.5px;color:var(--mute)}
+.vrow .vb .vh em{font-style:normal;color:var(--warm);font-weight:600}
+.vrow .btn{flex:none}
+@media(max-width:620px){.vrow{flex-wrap:wrap}.vrow .btn{width:100%}}
+.chip.amt.on{background:var(--warm);border-color:var(--warm);color:var(--cream)}
+.coffeeflash{position:fixed;left:50%;bottom:26px;transform:translate(-50%,80px);z-index:80;
+  background:var(--ink);color:var(--cream);padding:14px 22px;border-radius:999px;
+  font-size:14.5px;box-shadow:0 16px 34px -18px rgba(32,36,46,.9);opacity:0;
+  transition:transform .45s cubic-bezier(.22,1,.36,1),opacity .45s;max-width:92vw;text-align:center}
+.coffeeflash.go{transform:translate(-50%,0);opacity:1}

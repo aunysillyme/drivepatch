@@ -129,6 +129,19 @@ var JOURNAL=[
  {d:"Monday, 16 December",t:"Every parcel reached a porch before dark",
   p:"A steady day at the hall despite the sleet outside. Thomas and Elena drove the northern delivery route so that every parcel reached a front porch before dark. Only a few squares remain on the board tonight, and the quilt is almost whole."}
 ];
+/* the people actually doing the work, and what they have done this drive */
+var VOLS=[
+ {n:"Thomas",did:"drove the north loop twice this week",hrs:14,got:0},
+ {n:"Martha",did:"has run the sorting table since the first morning",hrs:31,got:0},
+ {n:"Clara",did:"sorted woollen socks by size for three hours",hrs:9,got:0},
+ {n:"David",did:"loaded vans all Friday afternoon",hrs:12,got:0},
+ {n:"Elena",did:"took the Saturday collection desk nobody wanted",hrs:8,got:0},
+ {n:"Arthur",did:"brought three boxes of gloves before nine",hrs:5,got:0},
+ {n:"Sarah",did:"is ringing round for children's coats",hrs:6,got:0},
+ {n:"Tomas",did:"sat with someone who lives alone",hrs:4,got:0},
+ {n:"Dev",did:"delivered on Christmas Eve last year too",hrs:11,got:0}
+];
+var VOLSHOW=4, COFFEE_FOR=-1;
 var SPONSORS=["Kirkby & Sons Hardware","The Corner Bakery","Northside Dental","Lena's Flowers"];
 /* Paid runs. Sponsors fund these so the drive can pay people who need the money,
    including people who are on the receiving side of it. Nobody is asked which. */
@@ -425,6 +438,7 @@ function vSponsor(){
     '<div class="sect" style="color:rgba(234,226,212,.6);margin-top:26px">already sponsoring this winter</div>'+
     '<div class="sponsors">'+SPONSORS.map(function(s){return '<span class="s">'+esc(s)+'</span>';}).join("")+'</div>'+
     '</div>'+
+    vCoffee()+
     '<div class="foot"><b>Sponsors see the same quilt everyone else sees, and a receipt.</b> '+
     'No names, no addresses. Organisers should still read each square before it goes up &mdash; in a small town, '+
     '&ldquo;a single dad, three kids, Alder Row&rdquo; is a name even when you have not written one.</div>';
@@ -833,6 +847,75 @@ function heartField(){
   return '<svg class="hearts" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'+out+'</svg>';
 }
 
+
+/* ---------------- buy a volunteer a coffee ----------------
+   Sponsorship at the scale of one person. No backend: this records the gesture
+   in the page so the flow is demonstrable end to end. */
+function vCoffee(){
+  var list=VOLS.slice(0,VOLSHOW).map(function(v,i){
+    return '<div class="vrow">'+
+      '<span class="sw">'+block(1,fabFor(v.n),false)+'</span>'+
+      '<div class="vb"><b>'+esc(v.n)+'</b>'+
+        '<span>'+esc(v.did)+'</span>'+
+        '<span class="vh">'+v.hrs+' hours this drive'+
+          (v.got?' &middot; <em>'+v.got+' coffees sent</em>':'')+'</span></div>'+
+      '<button class="btn ghost" onclick="openCoffee('+i+')">Buy a coffee</button>'+
+    '</div>';}).join("");
+  return '<div class="sect">buy a coffee for a volunteer</div>'+
+    '<p class="lede" style="font-size:16px;margin-bottom:16px">Sponsorship at the size of one person. '+
+    'These are the people in the hall on a cold Saturday. It goes straight to them, not to the drive.</p>'+
+    '<div class="vlist">'+list+'</div>'+
+    (VOLSHOW<VOLS.length
+      ? '<button class="btn ghost" style="margin-top:12px" onclick="VOLSHOW=VOLS.length;render()">'+
+        'View more &middot; '+(VOLS.length-VOLSHOW)+' others</button>'
+      : (VOLS.length>4?'<button class="btn ghost" style="margin-top:12px" onclick="VOLSHOW=4;render()">Show fewer</button>':''));
+}
+function openCoffee(i){
+  COFFEE_FOR=i; var v=VOLS[i];
+  resetSheet();
+  $("dneed").innerHTML="Buy "+esc(v.n)+" a coffee";
+  $("dsub").innerHTML=esc(v.did)+".";
+  $("dfl").style.display="none";
+  $("fabs").innerHTML='<div style="grid-column:1/-1">'+
+    '<div class="sl">how much</div>'+
+    '<div class="rowb" style="margin-bottom:14px" id="amts">'+
+      [4,8,15,25].map(function(m){return '<button type="button" class="chip amt" data-m="'+m+'" onclick="pickAmt('+m+')">$'+m+'</button>';}).join("")+
+    '</div>'+
+    '<div class="sl">or your own amount</div>'+
+    '<input class="in" id="cAmt" type="number" min="1" step="1" placeholder="$">'+
+    '<div class="sl">say something, if you want</div>'+
+    '<input class="in" id="cNote" maxlength="90" placeholder="thanks for doing the run in the sleet">'+
+    '</div>';
+  var sl=$("dname").parentNode.querySelector(".sl"); if(sl)sl.style.display="none";
+  $("dname").style.display="none";
+  $("dpriv").innerHTML="This is a gesture, not a wage. Sponsored shifts are on the Sponsored work page, "+
+    "and they pay properly.";
+  window.__coffee=true; $("dlg").showModal();
+}
+function pickAmt(m){
+  var f=$("cAmt"); if(f)f.value=m;
+  document.querySelectorAll(".amt").forEach(function(b){b.classList.toggle("on",+b.dataset.m===m);});
+}
+function sendCoffee(){
+  var v=VOLS[COFFEE_FOR]; if(!v)return;
+  var amt=Math.max(1,parseInt(($("cAmt")&&$("cAmt").value)||"4",10));
+  var note=($("cNote")&&$("cNote").value.trim())||"";
+  v.got+=1;
+  logIt("coffee","$"+amt+" sent to "+v.n+(note?' - "'+note+'"':""),(ME&&ME.name)||"somebody");
+  window.__coffee=false; COFFEE_FOR=-1;
+  $("dname").style.display=""; var sl=$("dname").parentNode.querySelector(".sl"); if(sl)sl.style.display="";
+  $("dlg").close();
+  flashCoffee("$"+amt+" is on its way to "+v.n+". They will see your name and your note.");
+  render();
+}
+function flashCoffee(msg){
+  var el=document.createElement("div");
+  el.className="coffeeflash"; el.textContent=msg;
+  document.body.appendChild(el);
+  setTimeout(function(){el.classList.add("go");},20);
+  setTimeout(function(){el.remove();},4200);
+}
+
 function render(){
   if(!document.querySelector(".hearts"))
     document.body.insertAdjacentHTML("afterbegin",heartField());
@@ -874,6 +957,7 @@ document.addEventListener("click",function(e){
   b.classList.add("on"); pickFab=+b.dataset.f;
 });
 function stitchIn(){
+  if(window.__coffee){ sendCoffee(); return; }
   if(window.__addHh){
     var nn=($("hhName")&&$("hhName").value.trim())||"(no name given)";
     var need=($("hhNeed")&&$("hhNeed").value.trim())||"A household \u00b7 nothing specified";
