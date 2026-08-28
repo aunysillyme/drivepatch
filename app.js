@@ -69,6 +69,14 @@ var SQUARES=[
  {t:"Someone living alone &middot; a hot meal and company",s:"held",by:"Tomas",note:"delivered",f:6,k:6},
  {t:"A family of six &middot; bedding, and the heating is off",s:"wait",days:4}
 ];
+var NAMES=["R. Alvarez","T. Whitmore","J. Okafor","M. Brennan","S. Petrou","L. Hadley",
+ "A. Nkemelu","D.ফell","K. Amara","P. Considine","N. Oyelaran","H. Vasquez"];
+var PHONES=["07700 900 141","07700 900 265","07700 900 383","07700 900 412","07700 900 559",
+ "07700 900 617","07700 900 728","07700 900 830","07700 900 946","07700 900 052",
+ "07700 900 173","07700 900 284"];
+var EMBLEMS=["The Winter Wren","The Cedar Branch","The Copper Lantern","The Quiet Harbour",
+ "The Amber Thistle","The Hollow Sparrow","The Bramble Meadow","The Salt Kettle",
+ "The Ember Finch","The Willow Hearth","The Winter Thistle","The Cedar Sparrow"];
 var STREETS=["14 Farrow Lane","3 Beckwith Court","82 Alder Row","27 Hollis Street",
  "9 Marsden Terrace","51 Quayle Road","6 Ivybridge Close","33 Pennant Way",
  "18 Cobham Rise","70 Sedge Walk","5 Lantern Yard","44 Birchall Grove"];
@@ -78,7 +86,20 @@ SQUARES.forEach(function(d,i){
   d.addr=STREETS[i%STREETS.length]+", Northside";
   d.how=WINDOWS[i%3];
   d.by_when=["Thursday","Friday","next Monday","Saturday"][i%4];
+  d.name=NAMES[i%NAMES.length];        /* organisers only, never rendered publicly */
+  d.phone=PHONES[i%PHONES.length];
+  d.emblem=EMBLEMS[i%EMBLEMS.length];
+  d.delivered=false;
 });
+/* every check-in, drop-off and delivery, in the order it happened */
+var LEDGER=[
+ {t:"Clara checked in at the collection desk",who:"Clara",kind:"check-in",when:"Sat 09:52"},
+ {t:"Maria dropped off groceries for square #2",who:"Maria",kind:"drop-off",when:"Thu 11:20"},
+ {t:"Dev delivered to The Copper Lantern",who:"Dev",kind:"delivered",when:"Wed 16:05"}
+];
+function logIt(kind,text,who){
+  LEDGER.unshift({t:text,who:who||((ME&&ME.name)||"somebody"),kind:kind,when:"just now"});
+}
 
 var TASKS=[
  {when:"Today<br>9:00",t:"Sorting warm coats and bedding",where:"Lower hall, tables along the north wall",st:"wait",
@@ -126,6 +147,12 @@ var PAID=[
 
 /* ---------------- state ---------------- */
 var ME=null, VIEW="quilt", FILTER="all", pickFab=0, pickIdx=-1, pickPet=-1;
+var CHECKED=null, HOURS=0;
+function checkIn(){
+  CHECKED="just now"; HOURS+=3;
+  logIt("check-in",(ME&&ME.name?ME.name:"A volunteer")+" checked in at the hall",ME&&ME.name);
+  render();
+}
 var $=function(id){return document.getElementById(id);};
 function waiting(){return SQUARES.filter(function(d){return d.s==="wait";});}
 function fabFor(name){return FAB[(String(name).length*3+String(name).charCodeAt(0))%8];}
@@ -150,7 +177,7 @@ function header(){
   if(ME&&ME.role!=="family") tabs.unshift(["dash","Dashboard","\uD83C\uDFE1"]);
   if(ME&&ME.role==="volunteer") tabs.splice(2,0,["mine","My tasks","\uD83D\uDCCB"]);
   if(ME&&ME.role==="provider")  tabs.splice(2,0,["mine","My pledges","\uD83D\uDCE6"]);
-  if(ME&&ME.role==="admin")     tabs.splice(2,0,["mine","Run the drive","\uD83D\uDDDD"],["people","Everyone","\uD83D\uDC65"]);
+  if(ME&&ME.role==="admin")     tabs.splice(2,0,["mine","Run the drive","\uD83D\uDDDD"],["people","The register","\uD83D\uDDC2"]);
   if(ME&&ME.role==="family")    tabs=[["slip","My request","\uD83D\uDD4A"],["pets","Pets &amp; shelter","\uD83D\uDC3E"],["journal","Drive journal","\uD83D\uDE9A"]];
   $("nav").innerHTML=tabs.map(function(t){
     return '<button class="'+(VIEW===t[0]?"on":"")+'" onclick="go(\''+t[0]+'\')">'+
@@ -291,6 +318,8 @@ function vMineVolunteer(){
     '<div class="card" style="margin-top:8px"><div class="qr">'+
     '<div class="code">'+QR.svg("DRIVEPATCH:CHECKIN:"+encodeURIComponent(ME.name)+":NORTHSIDE",130,"#22304F","#FEFBF6")+'</div>'+
     '<div class="txt"><h4>Scan code to check in</h4>'+
+    (CHECKED?'<div class="pill done" style="display:inline-block;margin-bottom:8px">checked in '+esc(CHECKED)+'</div>':
+      '<div><button class="btn warm" style="margin-bottom:10px" onclick="checkIn()">Or check in here</button></div>')+
     '<p>When you arrive, please check in at the garden gate before heading to your spot. '+
     'The organiser scans this, so you never have to find anyone or sign a clipboard.</p></div></div></div>';
 }
@@ -317,7 +346,8 @@ function vMineAdmin(){
     countBar()+
     '<div class="grid g3" style="margin-top:14px">'+
       '<div class="card"><div class="muted">still waiting</div><div class="big">'+waiting().length+'</div></div>'+
-      '<div class="card"><div class="muted">volunteers with nothing to do</div><div class="big">2</div></div>'+
+      '<div class="card"><div class="muted">checked in today</div><div class="big">'+
+        LEDGER.filter(function(l){return l.kind==="check-in";}).length+'</div></div>'+
       '<div class="card"><div class="muted">pledges past drop-off</div><div class="big" style="color:var(--warm)">1</div></div>'+
     '</div>'+
     '<div class="sect">households waiting longest for an unsewn square to turn warm</div>'+
@@ -478,7 +508,8 @@ function dashVolunteer(){
           nextCard("nothing booked","You have no active tasks right now.","","Find something to do","go(\'mine\')"))+
     statRow([[TASKS.filter(function(t){return t.st==="wait";}).length,"tasks to do"],
              [myHeld(),"squares you are holding"],
-             ["$"+myPaid().reduce(function(s,p){return s+p.rate*p.hrs;},0),"sponsored work you have taken","var(--warm)"]])+
+             [HOURS,"hours logged"],
+             ["$"+myPaid().reduce(function(s,p){return s+p.rate*p.hrs;},0),"sponsored work taken","var(--warm)"]])+
     (myPaid().length?'<div class="sect">paid work you have taken</div>'+myPaid().map(function(p){
       return '<div class="row"><div class="when">$'+(p.rate*p.hrs)+'</div><div class="body">'+
         '<h4>'+esc(p.t)+'</h4><div class="where">'+pinSvg()+esc(p.where)+' &middot; '+esc(p.when)+'</div></div>'+
@@ -686,6 +717,67 @@ function vTask(){
     'problem the organisers can solve. One nobody turns up to is a household that waits another week.</div>';
 }
 
+
+/* ---------------- the organisers' register ----------------
+   The brief asks for a record of who needs help and one place to manage it.
+   This is the only screen in the product where a household's real name exists. */
+function vRegister(){
+  if(!ME||ME.role!=="admin") return '<div class="card">Only the organisers can open the register. '+
+    '<button class="btn" style="margin-left:8px" onclick="openAuth()">Sign in</button></div>';
+  var rows=SQUARES.map(function(d,i){
+    return '<tr>'+
+      '<td><b>'+esc(d.name||"(new)")+'</b><div class="muted">'+esc(d.phone||"")+'</div></td>'+
+      '<td class="em">'+esc(d.emblem||"-")+'</td>'+
+      '<td>'+d.t+'</td>'+
+      '<td class="muted">'+esc(d.addr||"")+'<div>'+esc(d.how||"")+'</div></td>'+
+      '<td>'+(d.delivered?'<span class="pill done">delivered</span>'
+             :d.s==="held"?'<span class="pill wait">'+esc(d.by)+' has it</span>'
+             :'<span class="pill late">'+(d.days||0)+'d waiting</span>')+'</td>'+
+      '<td>'+(d.s==="held"&&!d.delivered
+        ?'<button class="btn warm" onclick="markDelivered('+i+')">Mark delivered</button>'
+        :d.delivered?'<span class="muted">closed</span>'
+        :'<button class="btn ghost" onclick="openSquare('+i+')">Open</button>')+'</td>'+
+    '</tr>';}).join("");
+  return '<h1 style="font-size:32px;margin-bottom:6px">The register</h1>'+
+    '<p class="lede">Every household that asked, with the name and number attached. '+
+    'This is the only page in DrivePatch where these appear. Do not screen-share it.</p>'+
+    '<div class="rowb" style="margin:18px 0">'+
+      '<button class="btn" onclick="openAddHh()">Add a household</button>'+
+      '<button class="btn ghost" onclick="exportCsv()">Export the drive records</button>'+
+      '<span class="muted">'+SQUARES.length+' households &middot; '+
+        SQUARES.filter(function(d){return d.delivered;}).length+' delivered</span></div>'+
+    '<div class="tblwrap"><table class="reg"><thead><tr>'+
+      '<th>Household</th><th>Their slip</th><th>What they asked for</th><th>Where it goes</th><th>Status</th><th></th>'+
+    '</tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '<div class="sect">what has actually happened</div>'+
+    LEDGER.map(function(l){
+      return '<div class="row"><div class="when">'+esc(l.when)+'</div><div class="body">'+
+        '<h4 style="font-size:16.5px">'+esc(l.t)+'</h4></div>'+
+        '<div class="side"><span class="pill '+(l.kind==="delivered"?"done":"wait")+'">'+esc(l.kind)+'</span></div></div>';}).join("");
+}
+function markDelivered(i){
+  SQUARES[i].delivered=true;
+  logIt("delivered","Delivered to "+(SQUARES[i].emblem||"a household"),ME&&ME.name);
+  render();
+}
+function openAddHh(){
+  resetSheet();
+  $("dneed").innerHTML="Add a household";
+  $("dsub").innerHTML="This puts a square on the quilt. Only you will ever see the name.";
+  $("dfl").style.display="none";
+  $("fabs").innerHTML='<div style="grid-column:1/-1">'+
+    '<div class="sl">their name, for your records only</div><input class="in" id="hhName" placeholder="R. Alvarez">'+
+    '<div class="sl">phone</div><input class="in" id="hhPh" placeholder="07700 900 000">'+
+    '<div class="sl">what goes on the quilt &mdash; no name, keep it general</div>'+
+    '<input class="in" id="hhNeed" placeholder="A family of four &middot; warm coats">'+
+    '<div class="sl">delivery address</div><input class="in" id="hhAddr" placeholder="14 Farrow Lane, Northside">'+
+    '</div>';
+  $("dname").parentNode.querySelector(".sl").style.display="none";
+  $("dname").style.display="none";
+  $("dpriv").innerHTML="The name and address stay on the register. The quilt shows only the line you type above, so write it the way you would want it written about you.";
+  window.__addHh=true; $("dlg").showModal();
+}
+
 function render(){
   header();
   var v=VIEW,h="";
@@ -693,7 +785,7 @@ function render(){
   else if(v==="mine"&&ME){h=ME.role==="volunteer"?vMineVolunteer():ME.role==="provider"?vMineProvider():vMineAdmin();}
   else if(v==="pets")h=vPets();
   else if(v==="pet")h=vPet();
-  else if(v==="people")h=vPeople();
+  else if(v==="people")h=vRegister();
   else if(v==="journal")h=vJournal();
   else if(v==="sponsor")h=vSponsor();
   else if(v==="paid")h=vPaid();
@@ -725,6 +817,19 @@ document.addEventListener("click",function(e){
   b.classList.add("on"); pickFab=+b.dataset.f;
 });
 function stitchIn(){
+  if(window.__addHh){
+    var nn=($("hhName")&&$("hhName").value.trim())||"(no name given)";
+    var need=($("hhNeed")&&$("hhNeed").value.trim())||"A household \u00b7 nothing specified";
+    SQUARES.unshift({t:need,s:"wait",days:0,k:Math.floor(Math.random()*8),
+      name:nn,phone:($("hhPh")&&$("hhPh").value.trim())||"",
+      addr:($("hhAddr")&&$("hhAddr").value.trim())||"(address not recorded)",
+      how:"however is easiest",by_when:"as soon as somebody takes it",
+      emblem:newEmblem(),delivered:false});
+    logIt("registered","A household was added to the register",ME&&ME.name);
+    window.__addHh=false;
+    $("dname").style.display=""; var sl=$("dname").parentNode.querySelector(".sl"); if(sl)sl.style.display="";
+    $("dlg").close(); render(); return;
+  }
   var nm=$("dname").value.trim()||"a neighbour";
   if(pickPet>=0){ PETNEEDS[pickPet].s="held"; PETNEEDS[pickPet].by=nm;
     PETNEEDS[pickPet].note="just taken on"; pickPet=-1; $("dlg").close(); render(); return; }

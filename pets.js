@@ -193,8 +193,8 @@ function walkCard(p){
     return '<button class="chip'+(taken?" on":"")+'" '+(taken?"disabled":"")+
       ' onclick="bookWalk(\''+esc(p.n)+'\',\''+w+'\')">'+w+(taken?" &middot; yours":"")+'</button>';}).join("");
   return '<div class="card" style="padding:0;overflow:hidden">'+
-    '<div style="display:flex;gap:0;align-items:stretch">'+
-      '<button style="width:118px;flex:none;position:relative;border:0;padding:0;background:none;cursor:pointer" onclick="openPet(\''+esc(p.n)+'\')">'+petFace(p,p.n.length)+'</button>'+
+    '<div class="walkcard">'+
+      '<button class="walkthumb" onclick="openPet(\''+esc(p.n)+'\')" aria-label="'+esc(p.n)+'">'+petFace(p,p.n.length)+'</button>'+
       '<div style="padding:16px 18px;flex:1;min-width:0">'+
         '<h4 style="font-size:21px;margin-bottom:2px"><button class="petlink" onclick="openPet(\''+esc(p.n)+'\')">'+esc(p.n)+'</button></h4>'+
         '<div class="muted" style="margin-bottom:7px">'+esc(p.age)+'</div>'+
