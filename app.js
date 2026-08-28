@@ -814,8 +814,7 @@ function openAddHh(){
 
 /* ---------------- faded hearts behind everything ----------------
    Deterministic scatter, not random, so it never reflows or flickers between
-   renders. Kept very low opacity on purpose: this page is about families who
-   are short this winter, and loud hearts would read as saccharine. */
+   renders. Around 25% opacity, Auny's call. */
 function heartField(){
   var seed=20261128;
   function rnd(){seed=(seed*1103515245+12345)&0x7FFFFFFF;return seed/0x7FFFFFFF;}
@@ -826,7 +825,7 @@ function heartField(){
     var x=rnd()*100, y=rnd()*100,
         s=0.5+rnd()*1.5,
         rot=(rnd()*50-25).toFixed(1),
-        op=(0.030+rnd()*0.055).toFixed(3),
+        op=(0.20+rnd()*0.09).toFixed(3),
         c=tones[Math.floor(rnd()*tones.length)];
     out+='<g transform="translate('+x.toFixed(2)+' '+y.toFixed(2)+') rotate('+rot+') scale('+
       (s*0.16).toFixed(3)+')" opacity="'+op+'"><path d="'+P+'" fill="'+c+'" transform="translate(-12 -12)"/></g>';
