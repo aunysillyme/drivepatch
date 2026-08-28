@@ -95,7 +95,9 @@ var QR=(function(){
          column 8; copy 2 runs up column 8 from the bottom then along row 8 from
          the right. Getting these coordinates wrong yields a matrix that looks
          perfect and decodes as nothing. */
-      for(i=0;i<15;i++){var b3=(f2>>i)&1;
+      /* MSB first: bit 14 leads. Writing these LSB-first produces a matrix that
+         looks perfect, passes every structural check, and decodes as nothing. */
+      for(i=0;i<15;i++){var b3=(f2>>(14-i))&1;
         if(i<6)       g2[8][i]=b3;
         else if(i===6)g2[8][7]=b3;
         else if(i===7)g2[8][8]=b3;

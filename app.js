@@ -196,6 +196,16 @@ function header(){
     return '<button class="'+(VIEW===t[0]?"on":"")+'" onclick="go(\''+t[0]+'\')">'+
       '<span class="ico" aria-hidden="true">'+(t[2]||"")+'</span>'+t[1]+'</button>';}).join("");
 }
+
+/* ---------------- QR payloads ----------------
+   A QR that encodes "DRIVEPATCH:CHECKIN:Thomas" scans on a phone as a meaningless
+   string and does nothing. These encode real URLs into the site instead, so a
+   scan lands the person on the right page.
+   The identifier goes in the HASH, never the query string: a fragment is never
+   sent to the server, so no name and no address leaves the phone. The drop code
+   carries the square number only - the address stays out of the payload. */
+var SITE="https://aunysillyme.github.io/drivepatch/";
+function qrLink(frag){return SITE+"#"+frag;}
 function go(v){VIEW=v;render();window.scrollTo(0,0);}
 function signOut(){ME=null;VIEW="quilt";render();}
 
@@ -362,7 +372,7 @@ function vMineVolunteer(){
     '<p class="lede">Thank you for giving your time to the drive today.</p>'+
     '<div class="sect">here are the places where hands are needed right now</div>'+t+
     '<div class="card" style="margin-top:8px"><div class="qr">'+
-    '<div class="code">'+QR.svg("DRIVEPATCH:CHECKIN:"+encodeURIComponent(ME.name)+":NORTHSIDE",130,"#22304F","#FEFBF6")+'</div>'+
+    '<div class="code">'+QR.svg(qrLink("checkin/northside"),130,"#22304F","#FEFBF6")+'</div>'+
     '<div class="txt"><h4>Scan code to check in</h4>'+
     (CHECKED?'<div class="pill done" style="display:inline-block;margin-bottom:8px">checked in '+esc(CHECKED)+'</div>':
       '<div><button class="btn warm" style="margin-bottom:10px" onclick="checkIn()">Or check in here</button></div>')+
@@ -379,7 +389,7 @@ function vMineProvider(){
     '<p class="lede">Thank you for taking a square on the quilt.</p>'+
     '<div class="sect">the squares you have promised for this drive</div>'+p+
     '<div class="card" style="margin-top:8px"><div class="qr">'+
-    '<div class="code">'+QR.svg("DRIVEPATCH:DROPOFF:"+encodeURIComponent(ME.name)+":NORTHSIDE",130,"#22304F","#FEFBF6")+'</div>'+
+    '<div class="code">'+QR.svg(qrLink("dropoff/northside"),130,"#22304F","#FEFBF6")+'</div>'+
     '<div class="txt"><h4>Tape this to your bag</h4>'+
     '<p>Please bring items to the parish hall side door between ten and four on weekdays. '+
     'Whoever receives it scans this and your square turns warm the same minute.</p></div></div></div>'+
@@ -635,7 +645,7 @@ function vSquare(){
       '<div class="where" style="display:flex;align-items:center;gap:7px;color:var(--ink2);margin:8px 0 4px">'+pinSvg()+esc(d.how)+'</div>'+
       '<div class="muted">Please have it there by '+esc(d.by_when)+'.</div>'+
       '<div class="qr" style="margin-top:18px"><div class="code">'+
-        QR.svg("DRIVEPATCH:DROP:"+SQ+":"+encodeURIComponent(d.addr),120,"#22304F","#FEFBF6")+'</div>'+
+        QR.svg(qrLink("square/"+SQ),120,"#22304F","#FEFBF6")+'</div>'+
         '<div class="txt"><h4>Show this at handover</h4><p>Scanned once and the square turns warm for everybody watching the quilt.</p></div></div>'+
       '<div class="priv" style="margin-top:16px">You are seeing this because you took this square on. It disappears again if you hand it back.</div></div>';
   }
@@ -736,7 +746,7 @@ function vTask(){
       '<div class="muted">Ask for <b style="color:var(--ink)">'+esc(k.lead)+'</b> &middot; '+esc(k.leadPh)+
         ' &middot; if you are running late, ring, do not just not turn up.</div>'+
       '<div class="qr" style="margin-top:18px"><div class="code">'+
-        QR.svg("DRIVEPATCH:CHECKIN:"+encodeURIComponent((ME&&ME.name)||"volunteer")+":T"+TASKNOW,120,"#22304F","#FEFBF6")+'</div>'+
+        QR.svg(qrLink("task/"+TASKNOW),120,"#22304F","#FEFBF6")+'</div>'+
         '<div class="txt"><h4>Scan this when you arrive</h4><p>Check in at the garden gate. '+
         'No clipboard, and nobody has to find you to tick you off a list.</p></div></div></div>'
     : '<div class="card" style="border-style:dashed;text-align:center;padding:26px">'+
@@ -1015,4 +1025,17 @@ function exportCsv(){
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   setTimeout(function(){URL.revokeObjectURL(url);},3000);
 }
+/* A scanned code opens the site at a hash; turn that into a view. Runs before
+   the first render and again if the hash changes. */
+function fromHash(){
+  var h=(location.hash||"").replace(/^#/,"").split("/");
+  if(!h[0]) return;
+  if(h[0]==="square"&&h[1]!=null){SQ=+h[1];VIEW="sq";}
+  else if(h[0]==="task"&&h[1]!=null){TASKNOW=+h[1];VIEW="task";}
+  else if(h[0]==="pet"&&h[1]){PETNOW=PETS.filter(function(x){return x.n===decodeURIComponent(h[1]);})[0]||null;VIEW=PETNOW?"pet":"pets";}
+  else if(h[0]==="checkin"||h[0]==="dropoff"){VIEW=ME?"mine":"quilt";}
+  else if(["quilt","pets","sponsor","journal","people","dash","mine"].indexOf(h[0])>=0)VIEW=h[0];
+}
+window.addEventListener("hashchange",function(){fromHash();render();});
+fromHash();
 render();

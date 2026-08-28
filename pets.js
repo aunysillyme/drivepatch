@@ -212,7 +212,7 @@ function bookWalk(name,when){
     $("dfl").style.display="none";
     $("dpriv").innerHTML="Turn up a few minutes early. If something comes up you can hand the slot back and nobody minds &mdash; better a free slot than an empty one.";
     $("fabs").innerHTML='<div style="grid-column:1/-1" class="qr">'+
-      '<div class="code">'+QR.svg("PATCHWORK:WALK:"+encodeURIComponent(name)+":"+encodeURIComponent(when),120,"#22304F","#FEFBF6")+'</div>'+
+      '<div class="code">'+QR.svg(qrLink("pet/"+encodeURIComponent(name)),120,"#22304F","#FEFBF6")+'</div>'+
       '<div class="txt"><h4>Show this at the kennel door</h4><p>The staff scan it and bring '+esc(name)+
       ' out to you. No paperwork, no waiting at reception.</p></div></div>';
     $("dname").value=ME?ME.name:"";
