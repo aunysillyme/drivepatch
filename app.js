@@ -93,14 +93,14 @@ var JOURNAL=[
 var SPONSORS=["Kirkby & Sons Hardware","The Corner Bakery","Northside Dental","Lena's Flowers"];
 
 /* ---------------- state ---------------- */
-var ME=null, VIEW="quilt", FILTER="all", pickFab=0, pickIdx=-1;
+var ME=null, VIEW="quilt", FILTER="all", pickFab=0, pickIdx=-1, pickPet=-1;
 var $=function(id){return document.getElementById(id);};
 function waiting(){return SQUARES.filter(function(d){return d.s==="wait";});}
 function fabFor(name){return FAB[(String(name).length*3+String(name).charCodeAt(0))%8];}
 
 /* ---------------- shell ---------------- */
 function header(){
-  var h='<button class="brand" onclick="go(\'quilt\')">Patchwork</button>'+
+  var h='<button class="brand" onclick="go(\'quilt\')">DrivePatch</button>'+
         '<span class="drivepick">'+DRIVE.name+' &middot; ends '+DRIVE.ends+'</span><span class="spacer"></span>';
   if(!ME) h+='<button class="btn ghost" onclick="openAuth()">Sign in</button>'+
              '<button class="btn" onclick="go(\'ask\')">Ask for something</button>';
@@ -111,11 +111,11 @@ function header(){
        '<button class="no" style="padding:4px" onclick="signOut()">sign out</button></span>';
   }
   $("top").innerHTML=h;
-  var tabs=[["quilt","The quilt"],["journal","Drive journal"],["sponsor","Sponsor a drive"]];
+  var tabs=[["quilt","The quilt"],["pets","Pets &amp; shelter"],["journal","Drive journal"],["sponsor","Sponsor a drive"]];
   if(ME&&ME.role==="volunteer") tabs.splice(1,0,["mine","My tasks"]);
   if(ME&&ME.role==="provider")  tabs.splice(1,0,["mine","My pledges"]);
   if(ME&&ME.role==="admin")     tabs.splice(1,0,["mine","Run the drive"],["people","Everyone"]);
-  if(ME&&ME.role==="family")    tabs=[["slip","My request"],["journal","Drive journal"]];
+  if(ME&&ME.role==="family")    tabs=[["slip","My request"],["pets","Pets &amp; shelter"],["journal","Drive journal"]];
   $("nav").innerHTML=tabs.map(function(t){
     return '<button class="'+(VIEW===t[0]?"on":"")+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>';}).join("");
 }
@@ -169,7 +169,7 @@ function vMineVolunteer(){
     '<p class="lede">Thank you for giving your time to the drive today.</p>'+
     '<div class="sect">here are the places where hands are needed right now</div>'+t+
     '<div class="card" style="margin-top:8px"><div class="qr">'+
-    '<div class="code">'+QR.svg("PATCHWORK:CHECKIN:"+encodeURIComponent(ME.name)+":NORTHSIDE",130,"#22304F","#FEFBF6")+'</div>'+
+    '<div class="code">'+QR.svg("DRIVEPATCH:CHECKIN:"+encodeURIComponent(ME.name)+":NORTHSIDE",130,"#22304F","#FEFBF6")+'</div>'+
     '<div class="txt"><h4>Scan code to check in</h4>'+
     '<p>When you arrive, please check in at the garden gate before heading to your spot. '+
     'The organiser scans this, so you never have to find anyone or sign a clipboard.</p></div></div></div>';
@@ -184,7 +184,7 @@ function vMineProvider(){
     '<p class="lede">Thank you for taking a square on the quilt.</p>'+
     '<div class="sect">the squares you have promised for this drive</div>'+p+
     '<div class="card" style="margin-top:8px"><div class="qr">'+
-    '<div class="code">'+QR.svg("PATCHWORK:DROPOFF:"+encodeURIComponent(ME.name)+":NORTHSIDE",130,"#22304F","#FEFBF6")+'</div>'+
+    '<div class="code">'+QR.svg("DRIVEPATCH:DROPOFF:"+encodeURIComponent(ME.name)+":NORTHSIDE",130,"#22304F","#FEFBF6")+'</div>'+
     '<div class="txt"><h4>Tape this to your bag</h4>'+
     '<p>Please bring items to the parish hall side door between ten and four on weekdays. '+
     'Whoever receives it scans this and your square turns warm the same minute.</p></div></div></div>'+
@@ -288,6 +288,7 @@ function render(){
   header();
   var v=VIEW,h="";
   if(v==="mine"&&ME){h=ME.role==="volunteer"?vMineVolunteer():ME.role==="provider"?vMineProvider():vMineAdmin();}
+  else if(v==="pets")h=vPets();
   else if(v==="people")h=vPeople();
   else if(v==="journal")h=vJournal();
   else if(v==="sponsor")h=vSponsor();
@@ -301,7 +302,15 @@ function setF(f){FILTER=f;render();}
 /* ---------------- claiming a square ---------------- */
 document.addEventListener("click",function(e){
   var p=e.target.closest(".patch"); if(!p||p.disabled)return;
-  pickIdx=+p.dataset.i;
+  if(p.dataset.pn!==undefined){
+    var pn=PETNEEDS[+p.dataset.pn];
+    $("dneed").innerHTML=pn.t;
+    $("fabs").innerHTML=FAB.map(function(f,i){
+      return '<button type="button" class="fab'+(i===pickFab?" on":"")+'" data-f="'+i+'">'+block(i%8,f,false)+'</button>';}).join("");
+    if(ME&&ME.name)$("dname").value=ME.name;
+    pickIdx=-1; pickPet=+p.dataset.pn; $("dlg").showModal(); return;
+  }
+  pickPet=-1; pickIdx=+p.dataset.i;
   $("dneed").innerHTML=SQUARES[pickIdx].t;
   $("fabs").innerHTML=FAB.map(function(f,i){
     return '<button type="button" class="fab'+(i===pickFab?" on":"")+'" data-f="'+i+'">'+block(i%8,f,false)+'</button>';}).join("");
@@ -315,6 +324,9 @@ document.addEventListener("click",function(e){
 });
 function stitchIn(){
   var nm=$("dname").value.trim()||"a neighbour";
+  if(pickPet>=0){ PETNEEDS[pickPet].s="held"; PETNEEDS[pickPet].by=nm;
+    PETNEEDS[pickPet].note="just taken on"; pickPet=-1; $("dlg").close(); render(); return; }
+  if(pickIdx<0){ $("dlg").close(); return; }
   SQUARES[pickIdx].s="held"; SQUARES[pickIdx].f=pickFab;
   SQUARES[pickIdx].by=nm; SQUARES[pickIdx].note="just taken on";
   var idx=pickIdx; $("dlg").close(); render();
