@@ -915,18 +915,18 @@ function pinSvg(){return '<svg width="13" height="13" viewBox="0 0 24 24" fill="
 /* ---------------- the drive ---------------- */
 var DRIVE={name:"Northside Winter Drive",ends:"14 December",org:"Northside Trust"};
 var SQUARES=[
- {t:"A family of five &middot; warm coats, two children under six",s:"wait",days:3},
+ {t:"A family of five &middot; warm coats, two children under six",s:"wait",days:1},
  {t:"A grandmother raising two &middot; groceries for the week",s:"held",by:"Maria",note:"dropping off Thursday",f:1,k:2},
- {t:"A teenager &middot; nobody has claimed anything for this age yet",s:"wait",days:6},
+ {t:"A teenager &middot; nobody has claimed anything for this age yet",s:"wait",days:2},
  {t:"A single dad, three kids &middot; winter boots",s:"held",by:"the Okonkwo family",note:"packed",f:2,k:5},
  {t:"A newborn arriving in January &middot; anything at all",s:"held",by:"Dev",note:"delivered",f:3,k:0},
- {t:"Two sisters, 9 and 11 &middot; a warm bed each",s:"wait",days:2},
+ {t:"Two sisters, 9 and 11 &middot; a warm bed each",s:"wait",days:1},
  {t:"An older couple &middot; heating oil and a hot meal",s:"held",by:"St Anne's",note:"delivered",f:4,k:3},
- {t:"A family of three &middot; nothing specified, they didn't want to ask",s:"wait",days:8},
+ {t:"A family of three &middot; nothing specified, they didn't want to ask",s:"wait",days:2},
  {t:"A mum on her own &middot; a winter coat, size 12",s:"held",by:"the Reyes family",note:"packed",f:5,k:1},
- {t:"A boy of seven who loses track of time building things",s:"wait",days:1},
+ {t:"A boy of seven who loses track of time building things",s:"wait",days:0},
  {t:"Someone living alone &middot; a hot meal and company",s:"held",by:"Tomas",note:"delivered",f:6,k:6},
- {t:"A family of six &middot; bedding, and the heating is off",s:"wait",days:4}
+ {t:"A family of six &middot; bedding, and the heating is off",s:"wait",days:1}
 ];
 var NAMES=["R. Alvarez","T. Whitmore","J. Okafor","M. Brennan","S. Petrou","L. Hadley",
  "A. Nkemelu","D.ফell","K. Amara","P. Considine","N. Oyelaran","H. Vasquez"];
@@ -1076,7 +1076,7 @@ function kindOf(t){
 function pace(){
   /* squares taken per day so far, then how long the rest would take at that rate */
   var held=SQUARES.filter(function(d){return d.s==="held";}).length;
-  var elapsed=8;                        /* days the drive has been open */
+  var elapsed=3;                        /* days the drive has been open */
   var perDay=held/elapsed;
   var left=waiting().length;
   if(!left) return {done:true};
@@ -1084,7 +1084,7 @@ function pace(){
   var days=Math.ceil(left/perDay);
   return {days:days,perDay:perDay,late:days>DAYS_LEFT,over:days-DAYS_LEFT};
 }
-function stuck(){return waiting().filter(function(d){return (d.days||0)>=5;});}
+function stuck(){return waiting().filter(function(d){return (d.days||0)>=2;});}
 function starved(){
   var by={};
   waiting().forEach(function(d){var k=kindOf(d.t);by[k]=(by[k]||0)+1;});
@@ -1093,11 +1093,11 @@ function starved(){
   return top?{kind:top,n:tn}:null;
 }
 function waitLadder(){
-  var buckets=[0,0,0,0];   /* 0-2, 3-4, 5-7, 8+ days */
+  var buckets=[0,0,0,0];   /* same day, 1 day, 2 days, 3+ days */
   waiting().forEach(function(d){var v=d.days||0;
-    buckets[v<3?0:v<5?1:v<8?2:3]++;});
+    buckets[v<1?0:v<2?1:v<3?2:3]++;});
   var max=Math.max.apply(null,buckets)||1;
-  var lab=["under 3 days","3 to 4 days","5 to 7 days","over a week"];
+  var lab=["same day","1 day","2 days","3 days or more"];
   var col=["var(--ok)","var(--navy)","var(--warm)","#A33F1F"];
   return '<div class="ladder">'+buckets.map(function(v,i){
     return '<div class="rung"><div class="bar"><span style="height:'+
@@ -1122,7 +1122,7 @@ function progressBoard(){
       paceCard+
       '<div class="pcard"><div class="pk">nobody has touched these</div>'+
         '<div class="pv">'+st.length+'</div>'+
-        '<p>'+(st.length?'Waiting five days or more with no volunteer. '+
+        '<p>'+(st.length?'Waiting two days or more with no volunteer. '+
           'These are the ones to name out loud at the next meeting.':'Every square has had interest in the last few days.')+'</p>'+
         (st.length?'<div class="stucklist">'+st.slice(0,3).map(function(d){
           return '<button class="stuckrow" onclick="openSquare('+SQUARES.indexOf(d)+')">'+
@@ -1259,7 +1259,7 @@ function vMineAdmin(){
     longest.map(function(d){
       return '<div class="row"><div class="when">'+(d.days||0)+' days</div><div class="body">'+
         '<h4 style="font-size:17px">'+d.t+'</h4></div><div class="side">'+
-        '<span class="pill '+((d.days||0)>5?"late":"wait")+'">'+((d.days||0)>5?"chase this":"waiting")+'</span></div></div>';}).join("")+
+        '<span class="pill '+((d.days||0)>=2?"late":"wait")+'">'+((d.days||0)>=2?"chase this":"waiting")+'</span></div></div>';}).join("")+
     '<div class="sect">this pledge is past its drop-off date and may need a quiet follow-up</div>'+
     '<div class="row"><div class="body"><h4 style="font-size:17px">Warm coats &times; 4 &mdash; promised by R. Alvarez</h4>'+
       '<div class="where" style="margin-top:6px">Due at the hall two days ago</div></div>'+
