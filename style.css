@@ -174,11 +174,19 @@ button{font-family:inherit}
 .step.todo h4,.step.todo p{color:var(--mute)}
 
 /* ---------- dialogs ---------- */
-dialog{border:0;padding:0;background:transparent;max-width:540px;width:calc(100% - 30px)}
+dialog{border:0;padding:0;background:transparent;max-width:540px;width:calc(100% - 30px);
+  margin:auto;max-height:none;inset:0}
+dialog[open]{display:block}
 dialog::backdrop{background:rgba(32,36,46,.5);backdrop-filter:blur(3px)}
 .sheet{background:var(--cream);border-radius:6px;padding:28px 26px 24px;
   border:1.5px solid var(--seam);box-shadow:0 30px 60px -30px rgba(32,36,46,.85);
-  max-height:88vh;overflow:auto}
+  max-height:86vh;overflow:auto;position:relative}
+/* close */
+.xclose{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;
+  border:1.5px solid var(--seam);background:var(--paper);color:var(--ink2);cursor:pointer;
+  font-size:19px;line-height:1;display:grid;place-items:center;padding:0;z-index:3}
+.xclose:hover{border-color:var(--navy);color:var(--navy);background:var(--cream)}
+.sheet h3{padding-right:44px}
 .sheet h3{font-size:27px;line-height:1.2;margin-bottom:6px}
 .sheet .sub2{font-size:15px;color:var(--ink2);margin-bottom:20px}
 .sl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;
@@ -244,3 +252,11 @@ dialog::backdrop{background:rgba(32,36,46,.5);backdrop-filter:blur(3px)}
 /* an address you have not earned: never rendered legibly, and never sent */
 .blurred{font-family:Fraunces,Georgia,serif;font-size:24px;color:var(--mute);
   filter:blur(7px);user-select:none;pointer-events:none}
+
+/* a household tag you can take back off */
+.person.tagx{cursor:pointer;font-family:inherit;font-size:13.5px;padding:6px 8px 6px 14px;
+  gap:9px;color:var(--ink);transition:border-color .18s,background .18s}
+.person.tagx:hover{border-color:var(--navy);background:var(--cream)}
+.person.tagx .x{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;
+  background:rgba(34,48,79,.09);color:var(--navy);font-size:15px;line-height:1}
+.person.tagx:hover .x{background:var(--navy);color:var(--cream)}

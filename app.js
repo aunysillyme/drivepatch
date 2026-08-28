@@ -283,16 +283,25 @@ function vAsk(){
     '<div class="sl">and if there is a child, what makes them lose track of time?</div>'+
     '<input class="in" placeholder="building things, drawing, anything at all">'+
     '<div class="sl">how would you like to receive it</div>'+
-    '<div class="rowb" style="margin-bottom:18px">'+
-      '<button class="btn ghost">Left quietly on the doorstep</button>'+
-      '<button class="btn ghost">Pull up and we load the boot</button>'+
-      '<button class="btn ghost">A ten minute window, no line</button></div>'+
+    '<div class="rowb" id="howList" style="margin-bottom:18px">'+
+      HOWS.map(function(w,i){return '<button class="chip'+(HOW===i?" on":"")+
+        '" onclick="setHow('+i+')">'+w+'</button>';}).join("")+'</div>'+
     '<button class="btn warm" onclick="go(\'slip\')">Send this quietly</button>'+
     '<div class="priv">We ask what a child loves because a present chosen for &ldquo;a boy, 9&rdquo; is a present that gets left in a cupboard. You will get a slip with two words on it, and that is the only thing you will ever need to check on this.</div>'+
     '</div>';
 }
-function addWho(k){var l=$("whoList");
-  l.insertAdjacentHTML("beforeend",'<span class="person" style="padding-left:13px"><b>'+k+'</b></span>');}
+var WHO=[], HOW=-1;
+var HOWS=["Left quietly on the doorstep","Pull up and we load the boot","A ten minute window, no line"];
+function addWho(k){WHO.push(k);drawWho();}
+function dropWho(i){WHO.splice(i,1);drawWho();}
+function setHow(i){HOW=(HOW===i?-1:i);render();}
+function drawWho(){
+  var l=$("whoList"); if(!l)return;
+  l.innerHTML=WHO.length?WHO.map(function(k,i){
+    return '<button class="person tagx" onclick="dropWho('+i+')" title="remove">'+
+      '<b>'+esc(k)+'</b><span class="x">&times;</span></button>';}).join("")
+    : '<span class="muted">Nobody added yet. Tap the buttons above.</span>';
+}
 
 
 /* ---------------- dashboards: what this person should do next ---------------- */
@@ -415,8 +424,13 @@ function vSquare(){
       '</div></div>'+
     '<div class="foot"><b>The household never sees you either.</b> They get a text saying it is ready, in the way they chose to receive it.</div>';
 }
+function resetSheet(){
+  $("dsub").innerHTML="You're taking this one on. It stops being a number the moment you do.";
+  $("dfl").style.display="";
+  $("dpriv").innerHTML="You'll get the drop-off details by text. The organisers handle the handover, the way the household chose to receive it.";
+}
 function claimSquare(i){
-  pickIdx=i; pickPet=-1;
+  resetSheet(); pickIdx=i; pickPet=-1;
   $("dneed").innerHTML=SQUARES[i].t;
   $("fabs").innerHTML=FAB.map(function(f,k){
     return '<button type="button" class="fab'+(k===pickFab?" on":"")+'" data-f="'+k+'">'+block(k%8,f,false)+'</button>';}).join("");
@@ -434,7 +448,7 @@ function render(){
   else if(v==="journal")h=vJournal();
   else if(v==="sponsor")h=vSponsor();
   else if(v==="slip")h=vSlip();
-  else if(v==="ask")h=vAsk();
+  else if(v==="ask"){h=vAsk();setTimeout(drawWho,0);}
   else if(v==="sq")h=vSquare();
   else h=vQuilt();
   $("app").innerHTML=h;
@@ -446,7 +460,7 @@ document.addEventListener("click",function(e){
   var p=e.target.closest(".patch"); if(!p||p.disabled)return;
   if(p.dataset.pn!==undefined){
     var pn=PETNEEDS[+p.dataset.pn];
-    $("dneed").innerHTML=pn.t;
+    resetSheet(); $("dneed").innerHTML=pn.t;
     $("fabs").innerHTML=FAB.map(function(f,i){
       return '<button type="button" class="fab'+(i===pickFab?" on":"")+'" data-f="'+i+'">'+block(i%8,f,false)+'</button>';}).join("");
     if(ME&&ME.name)$("dname").value=ME.name;

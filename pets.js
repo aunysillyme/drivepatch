@@ -145,7 +145,10 @@ function bookWalk(name,when){
   BOOKED[name+"|"+when]=1; render();
   setTimeout(function(){
     var d=$("dlg");
-    $("dneed").innerHTML="You're walking "+esc(name)+", "+esc(when)+".";
+    $("dneed").innerHTML="You're walking "+esc(name)+".";
+    $("dsub").innerHTML=esc(when)+". They get an hour out, and somebody to be pleased to see.";
+    $("dfl").style.display="none";
+    $("dpriv").innerHTML="Turn up a few minutes early. If something comes up you can hand the slot back and nobody minds &mdash; better a free slot than an empty one.";
     $("fabs").innerHTML='<div style="grid-column:1/-1" class="qr">'+
       '<div class="code">'+QR.svg("PATCHWORK:WALK:"+encodeURIComponent(name)+":"+encodeURIComponent(when),120,"#22304F","#FEFBF6")+'</div>'+
       '<div class="txt"><h4>Show this at the kennel door</h4><p>The staff scan it and bring '+esc(name)+
@@ -157,6 +160,9 @@ function bookWalk(name,when){
 function foster(name){
   var d=$("dlg");
   $("dneed").innerHTML="Foster "+esc(name)+".";
+  $("dsub").innerHTML="A warm room, and somebody to notice them. That is the whole job.";
+  $("dfl").style.display="none";
+  $("dpriv").innerHTML="Somebody from the shelter rings you first for a chat, not an inspection. You can say no after that call and it costs you nothing.";
   $("fabs").innerHTML='<div style="grid-column:1/-1" class="note" style="margin:0">'+
     'A foster is a warm room for a few weeks, not a lifetime promise. '+
     'The shelter covers food, litter and every vet visit. If it turns out you cannot keep going, '+
