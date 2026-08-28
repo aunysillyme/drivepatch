@@ -753,6 +753,20 @@ var JOURNAL=[
   p:"A steady day at the hall despite the sleet outside. Thomas and Elena drove the northern delivery route so that every parcel reached a front porch before dark. Only a few squares remain on the board tonight, and the quilt is almost whole."}
 ];
 var SPONSORS=["Kirkby & Sons Hardware","The Corner Bakery","Northside Dental","Lena's Flowers"];
+/* Paid runs. Sponsors fund these so the drive can pay people who need the money,
+   including people who are on the receiving side of it. Nobody is asked which. */
+var PAID=[
+ {t:"Stitch in a patch",rate:20,hrs:2,unit:"per patch you finish",by:"Kirkby & Sons Hardware",
+  when:"any time before Sunday",where:"Lower hall, or from home",need:"nothing, we show you",taken:null},
+ {t:"Evening delivery run, north loop",rate:22,hrs:3,unit:"per hour",by:"The Corner Bakery",
+  when:"Thu 17:00 - 20:00",where:"Loading bay behind the church",need:"a car and a clean licence",taken:null},
+ {t:"Weekend sorting and packing",rate:18,hrs:12,unit:"per hour",by:"Northside Dental",
+  when:"Sat and Sun, 10:00 - 16:00",where:"Lower hall",need:"nothing at all",taken:null},
+ {t:"Saturday collection point",rate:18,hrs:4,unit:"per hour",by:"Lena's Flowers",
+  when:"Sat 09:00 - 13:00",where:"Front entrance table",need:"you can sit down for most of it",taken:"Elena"},
+ {t:"Van driver, two depot runs",rate:25,hrs:6,unit:"per hour",by:"Kirkby & Sons Hardware",
+  when:"Fri 08:00 - 14:00",where:"Depot, Quayle Road",need:"a van licence, fuel covered",taken:null}
+];
 
 /* ---------------- state ---------------- */
 var ME=null, VIEW="quilt", FILTER="all", pickFab=0, pickIdx=-1, pickPet=-1;
@@ -774,7 +788,7 @@ function header(){
   }
   $("top").innerHTML=h;
   var tabs=[["quilt","The quilt","\uD83E\uDDF5"],["pets","Pets &amp; shelter","\uD83D\uDC3E"],
-            ["journal","Drive journal","\uD83D\uDE9A"],["sponsor","Sponsor a drive","\uD83D\uDC9B"]];
+            ["journal","Drive journal","\uD83D\uDE9A"],["paid","Sponsored work","\uD83D\uDCB5"],["sponsor","Sponsor a drive","\uD83D\uDC9B"]];
   if(ME&&ME.role!=="family") tabs.unshift(["dash","Dashboard","\uD83C\uDFE1"]);
   if(ME&&ME.role==="volunteer") tabs.splice(2,0,["mine","My tasks","\uD83D\uDCCB"]);
   if(ME&&ME.role==="provider")  tabs.splice(2,0,["mine","My pledges","\uD83D\uDCE6"]);
@@ -911,6 +925,7 @@ function vSponsor(){
 }
 function vSlip(){
   var em=ME?ME.name:"The Winter Wren";
+  var fresh=SQUARES.filter(function(d){return d.fresh;})[0];
   return '<div class="slip"><div class="muted" style="letter-spacing:.14em;text-transform:uppercase;font-size:10.5px;font-weight:600">your slip</div>'+
     '<div class="em">'+esc(em)+'</div>'+
     '<p style="color:var(--ink2)">Here is where things stand with your square. You will never have to stand in a queue or explain your situation to anyone.</p>'+
@@ -919,6 +934,9 @@ function vSlip(){
       '<div class="step now"><span class="dot">&bull;</span><div><h4>A neighbour has taken your square</h4><p>They are putting everything together now. You do not need to call or wonder.</p></div></div>'+
       '<div class="step todo"><span class="dot"></span><div><h4>Ready for a quiet handover</h4><p>We will text you the moment it is ready, with the way you asked to receive it.</p></div></div>'+
     '</div>'+
+    (fresh?'<div class="note" style="border-left-color:var(--ok)"><b>Your square is on the quilt now.</b> '+
+      'It reads: &ldquo;'+fresh.t+'&rdquo; &mdash; and that is all anybody else can see. '+
+      '<button class="no" style="padding:2px 0;text-decoration:underline" onclick="go(\'quilt\')">Look at the board</button></div>':'')+
     '<div class="note">If you have lost this slip, ring the number on your text. We will never ask you to prove who you are to get an answer about your own request.</div>'+
     '</div>';
 }
@@ -934,18 +952,51 @@ function vAsk(){
       '<button class="btn ghost" onclick="addWho(\'an elder\')">+ an elder</button></div>'+
     '<div class="people" id="whoList" style="margin-bottom:18px"></div>'+
     '<div class="sl">what would make the biggest difference</div>'+
-    '<input class="in" placeholder="warm coats, or a hot meal, or you do not have to say">'+
+    '<input class="in" id="askNeed" placeholder="warm coats, or a hot meal, or you do not have to say">'+
     '<div class="sl">and if there is a child, what makes them lose track of time?</div>'+
-    '<input class="in" placeholder="building things, drawing, anything at all">'+
+    '<input class="in" id="askJoy" placeholder="building things, drawing, anything at all">'+
     '<div class="sl">how would you like to receive it</div>'+
     '<div class="rowb" id="howList" style="margin-bottom:18px">'+
       HOWS.map(function(w,i){return '<button class="chip'+(HOW===i?" on":"")+
         '" onclick="setHow('+i+')">'+w+'</button>';}).join("")+'</div>'+
-    '<button class="btn warm" onclick="go(\'slip\')">Send this quietly</button>'+
+    '<button class="btn warm" onclick="submitAsk()">Send this quietly</button>'+
     '<div class="priv">We ask what a child loves because a present chosen for &ldquo;a boy, 9&rdquo; is a present that gets left in a cupboard. You will get a slip with two words on it, and that is the only thing you will ever need to check on this.</div>'+
     '</div>';
 }
-var WHO=[], HOW=-1;
+var WHO=[], HOW=-1, MYEMBLEM=null;
+var E1=["Winter","Cedar","Copper","Quiet","Amber","Hollow","Bramble","Salt","Ember","Willow"];
+var E2=["Wren","Branch","Lantern","Harbour","Thistle","Sparrow","Meadow","Kettle","Finch","Hearth"];
+function newEmblem(){
+  return "The "+E1[Math.floor(Math.random()*E1.length)]+" "+E2[Math.floor(Math.random()*E2.length)];
+}
+/* Turn what a household typed into a square, WITHOUT ever writing a name.
+   Composition and the ask only - the same shape every other square has. */
+function submitAsk(){
+  var need=($("askNeed")&&$("askNeed").value.trim())||"";
+  var joy=($("askJoy")&&$("askJoy").value.trim())||"";
+  var kids=WHO.filter(function(w){return w==="a child";}).length;
+  var teens=WHO.filter(function(w){return w==="a teenager";}).length;
+  var elders=WHO.filter(function(w){return w==="an elder";}).length;
+  var who;
+  if(!WHO.length) who="A household";
+  else if(WHO.length===1) who="Someone on their own";
+  else who="A household of "+WHO.length;
+  var bits=[];
+  if(kids) bits.push(kids===1?"one child":kids+" children");
+  if(teens) bits.push(teens===1?"a teenager":teens+" teenagers");
+  if(elders) bits.push(elders===1?"an elder at home":elders+" elders at home");
+  var line=who+(bits.length?" \u00b7 "+bits.join(", "):"");
+  line+=" \u00b7 "+(need||"nothing specified, they didn't want to ask");
+  if(joy) line+=" \u00b7 loses track of time "+joy;
+  MYEMBLEM=newEmblem();
+  SQUARES.unshift({t:line,s:"wait",days:0,k:Math.floor(Math.random()*8),
+    addr:"(held by the organisers until somebody takes this square)",
+    how:HOW>=0?HOWS[HOW]:"however is easiest",by_when:"as soon as somebody takes it",
+    fresh:true});
+  WHO=[];HOW=-1;
+  ME={name:MYEMBLEM,role:"family"};
+  VIEW="slip";render();window.scrollTo(0,0);
+}
 var HOWS=["Left quietly on the doorstep","Pull up and we load the boot","A ten minute window, no line"];
 function addWho(k){WHO.push(k);drawWho();}
 function dropWho(i){WHO.splice(i,1);drawWho();}
@@ -1093,6 +1144,42 @@ function claimSquare(i){
   $("dlg").showModal();
 }
 
+
+function vPaid(){
+  var open=PAID.filter(function(p){return !p.taken;});
+  var pot=open.reduce(function(s,p){return s+p.rate*p.hrs;},0);
+  return '<div class="hero"><h1>Sponsored work, <em>paid by the hour.</em></h1>'+
+    '<p class="lede">Sponsors put money behind these so the drive can pay people for the work. '+
+    'Anyone can take one, and we never ask whether you are also on the board.</p></div>'+
+    '<div class="count"><b>'+open.length+'</b><span class="lab">'+
+      (open.length===1?"opportunity open":"opportunities open")+'</span>'+
+      '<span class="sub">$'+pot+' unclaimed this week<br>'+
+      '<em>paid within 3 days, no invoice needed</em></span></div>'+
+    '<div class="sect">open right now</div>'+
+    PAID.map(function(p,i){
+      return '<div class="row"><div class="when" style="min-width:96px">'+
+          '<div style="font-family:Fraunces,Georgia,serif;font-size:30px;color:var(--warm);line-height:1">$'+p.rate+'</div>'+
+          '<div class="muted" style="font-size:11.5px">'+esc(p.unit)+'</div></div>'+
+        '<div class="body"><h4>'+esc(p.t)+'</h4>'+
+        '<div class="where">'+pinSvg()+esc(p.where)+' &middot; '+esc(p.when)+'</div>'+
+        '<div class="muted" style="margin-top:5px">You need: '+esc(p.need)+'</div>'+
+        '<div class="muted" style="margin-top:3px">Sponsored by '+esc(p.by)+
+          ' &middot; about $'+(p.rate*p.hrs)+' in total</div></div>'+
+        '<div class="side">'+(p.taken
+          ? '<span class="pill done">taken by '+esc(p.taken)+'</span>'
+          : '<button class="btn warm" onclick="takePaid('+i+')">Take this</button>')+
+        '</div></div>';}).join("")+
+    '<div class="sect">who is funding this</div><div class="people">'+
+      SPONSORS.map(function(s){return '<span class="person" style="padding-left:13px"><b>'+esc(s)+'</b></span>';}).join("")+
+    '</div>'+
+    '<div class="foot"><b>Nobody is asked why they want the money.</b> A person can be on the '+
+    'quilt and on this page in the same week, and neither page knows about the other. '+
+    'That is the point: needing help and needing work are the same week for most people.</div>';
+}
+function takePaid(i){
+  PAID[i].taken=(ME&&ME.name)||"you"; render();
+}
+
 function render(){
   header();
   var v=VIEW,h="";
@@ -1102,6 +1189,7 @@ function render(){
   else if(v==="people")h=vPeople();
   else if(v==="journal")h=vJournal();
   else if(v==="sponsor")h=vSponsor();
+  else if(v==="paid")h=vPaid();
   else if(v==="slip")h=vSlip();
   else if(v==="ask"){h=vAsk();setTimeout(drawWho,0);}
   else if(v==="sq")h=vSquare();
