@@ -277,6 +277,26 @@ dialog::backdrop{background:rgba(32,36,46,.5);backdrop-filter:blur(3px)}
 .person.tagx .x{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;
   background:rgba(34,48,79,.09);color:var(--navy);font-size:15px;line-height:1}
 .person.tagx:hover .x{background:var(--navy);color:var(--cream)}
+
+/* ---------- phones: every tap target clears 44px ----------
+   The people using this are volunteers in a cold hall and grandparents on an
+   old handset. Apple's 44px minimum is the floor, not a suggestion. */
+@media(max-width:760px){
+  .btn,.chip,.nav button,.no,.cta,.signin,.tier{min-height:44px}
+  .btn,.signin{padding:12px 20px}
+  .chip{padding:11px 16px}
+  .nav button{padding:12px 18px}
+  .cta{padding:10px 15px;font-size:13.5px}
+  .brand{min-height:44px;display:flex;align-items:center}
+  .xclose{width:44px;height:44px;font-size:22px}
+  .in{padding:13px 14px;font-size:16px}   /* 16px stops iOS zooming the page */
+  .row{flex-wrap:wrap}
+  .row .side{width:100%;align-items:flex-start;margin-top:10px}
+  .count b{font-size:46px}
+  .count .sub{margin-left:0;text-align:left;width:100%}
+  .hint{margin-left:0;width:100%}
+  .nav{gap:14px 12px}
+}
 </style></head><body>
 <div class="wrap">
   <div class="top" id="top"></div>
